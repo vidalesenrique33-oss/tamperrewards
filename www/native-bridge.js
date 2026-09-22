@@ -1,7 +1,7 @@
 (function(){
   const cap=window.Capacitor;
   const native=!!(cap&&typeof cap.isNativePlatform==='function'&&cap.isNativePlatform());
-  window.__TAMPER_BUILD__='1.0.5-direct-id-token';
+  window.__TAMPER_BUILD__='1.0.6-fixed-apk-signature';
   window.__TAMPER_NATIVE__=native;
   window.TamperNative={
     active:native,

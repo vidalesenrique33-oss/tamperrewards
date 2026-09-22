@@ -32,12 +32,17 @@ carpeta `.github`, que contiene el constructor del APK.
 3. Presiona **Run workflow** y nuevamente **Run workflow**.
 4. Espera a que el proceso muestre una marca verde.
 5. Abre la ejecución terminada y, en **Artifacts**, descarga
-   `Tamper-Rewards-APK-v1.0.5`.
+   `Tamper-Rewards-APK-v1.0.6`.
 6. Extrae el ZIP descargado. Dentro estará
-   `Tamper-Rewards-v1.0.5-debug.apk`.
+   `Tamper-Rewards-v1.0.6-debug.apk`.
 
 Para instalarlo en un teléfono Android, transfiere el APK al teléfono, ábrelo y
 autoriza temporalmente la instalación desde esa fuente cuando Android lo pida.
+
+> **Importante para la versión 1.0.6:** desinstala primero cualquier versión
+> 1.0.5 o anterior. La 1.0.5 defectuosa fue firmada con otra llave y Android no
+> permite instalar encima una aplicación con una firma distinta. Después de
+> instalar la 1.0.6, las siguientes versiones sí podrán actualizarse normalmente.
 
 ## Cuando cambies la app
 
@@ -47,7 +52,7 @@ También puedes iniciarlo manualmente desde **Actions**.
 
 ## Alcance de este APK
 
-`Tamper-Rewards-v1.0.5-debug.apk` sirve para probar e instalar directamente. No es el
+`Tamper-Rewards-v1.0.6-debug.apk` sirve para probar e instalar directamente. No es el
 archivo final para Google Play. La tienda requiere un AAB firmado con una llave
 privada y una ficha de publicación.
 
@@ -59,3 +64,8 @@ compilar agrega:
 - `ios/App/App/GoogleService-Info.plist`
 
 Consulta `FIREBASE-NATIVO.md` antes de publicar una versión de producción.
+
+La automatización también lee el certificado **del APK terminado** y exige que
+su SHA-1 sea `B2:B1:D0:5C:06:D4:27:19:B3:40:A0:16:BA:FA:09:E8:4E:F2:E8:AC`,
+la huella registrada para `com.tamper.rewards`. Si Gradle usa otra llave, la
+ejecución falla y no publica un artefacto incorrecto.

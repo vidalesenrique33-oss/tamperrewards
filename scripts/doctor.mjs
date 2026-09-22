@@ -26,19 +26,25 @@ assert.equal(cap.plugins.FirebaseAuthentication.skipNativeAuth,true);
 assert.match(html,/signInWithCredential/,'Falta enlazar la credencial nativa con Firebase web');
 assert.match(nativeBridge,/callNative\('TamperGoogleAuth','signIn'/,'Falta Google Sign-In nativo directo');
 assert.match(nativeBridge,/registerPlugin\(name\)/,'Los plugins nativos deben registrarse en una app sin bundler');
-assert.match(nativeBridge,/1\.0\.5-direct-id-token/,'Falta la marca verificable de esta compilación');
+assert.match(nativeBridge,/1\.0\.6-fixed-apk-signature/,'Falta la marca verificable de esta compilación');
 assert.match(nativeBridge,/cap\.nativePromise\(pluginName,methodName,options\)/,'Google debe usar directamente el Bridge nativo');
 assert.match(mainActivity,/registerPlugin\(FirebaseAuthenticationPlugin\.class\)/,'MainActivity debe registrar Firebase Authentication explícitamente');
 assert.match(mainActivity,/registerPlugin\(TamperGoogleAuthPlugin\.class\)/,'MainActivity debe registrar el acceso minimo de Google');
 assert.match(tamperGooglePlugin,/requestIdToken\(webClientId\)/,'El puente debe solicitar el ID token');
 assert.doesNotMatch(tamperGooglePlugin,/requestServerAuthCode|GoogleAuthUtil\.getToken/,'El puente no debe pedir credenciales que Tamper no usa');
-assert.match(read('android/app/build.gradle'),/versionCode\s+6/,'Android debe generar una actualización distinguible');
+const androidBuild=read('android/app/build.gradle');
+assert.match(androidBuild,/versionCode\s+7/,'Android debe generar una actualización distinguible');
+assert.match(androidBuild,/rootProject\.file\(['"]tamper-debug\.keystore['"]\)/,'Gradle debe usar la llave estable explícita');
+assert.match(androidBuild,/debug\s*\{[\s\S]*signingConfig\s+signingConfigs\.tamperDebug/,'La compilación debug debe fijar su firma');
 assert.match(read('android/app/build.gradle'),/play-services-auth/,'La app debe compilar el selector de cuentas de Google');
 assert.match(read('android/variables.gradle'),/playServicesAuthVersion\s*=\s*'20\.7\.0'/,'Falta fijar la versión de Google Sign-In');
 assert.match(read('android/variables.gradle'),/androidxCredentialsVersion\s*=\s*'1\.6\.0'/,'Versión principal de Credential Manager incorrecta');
 assert.match(read('android/variables.gradle'),/androidxCredentialsPlayServicesAuthVersion\s*=\s*'1\.6\.0'/,'Las bibliotecas de Credential Manager deben usar la misma versión');
 assert.match(androidWorkflow,/java-version:\s*["']21["']/,'El constructor Android debe usar Java 21');
 assert.match(androidWorkflow,/debug\.keystore/,'El constructor debe conservar una firma de prueba estable');
+assert.match(androidWorkflow,/cp "\$HOME\/\.android\/debug\.keystore" android\/tamper-debug\.keystore/,'El constructor debe entregar a Gradle la llave verificada');
+assert.match(androidWorkflow,/node scripts\/apk-signature\.mjs[^\n]+--sha1/,'El constructor debe leer la firma real del APK');
+assert.doesNotMatch(androidWorkflow,/se publicará para permitir la prueba/,'Una firma no verificable nunca debe publicarse');
 for(const platform of ['android','ios']){
   assert.ok(fs.existsSync(new URL('../'+platform,import.meta.url)),`Falta el proyecto ${platform}`);
 }

@@ -9,3 +9,4 @@ ios/App/Pods/
 ios/App/DerivedData/
 ios/App/App/GoogleService-Info.plist
 android/app/google-services.json
+android/tamper-debug.keystore

@@ -44,8 +44,8 @@ Android se abre con Android Studio. iOS se abre con Xcode en una Mac.
 El repositorio incluye `.github/workflows/build-android-apk.yml`. Ese flujo usa
 GitHub Actions para generar un APK Android de prueba sin instalar Android Studio
 en el Chromebook. Sigue `APK-DESDE-CHROMEBOOK.md`; al terminar podrás descargar
-el artefacto `Tamper-Rewards-APK-v1.0.5` con el archivo
-`Tamper-Rewards-v1.0.5-debug.apk`.
+el artefacto `Tamper-Rewards-APK-v1.0.6` con el archivo
+`Tamper-Rewards-v1.0.6-debug.apk`.
 
 Esta entrega es el código fuente móvil completo, no un APK ni un IPA firmado.
 El APK de prueba puede generarse con GitHub Actions. Una publicación de Android

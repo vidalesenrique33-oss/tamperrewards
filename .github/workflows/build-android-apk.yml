@@ -11,7 +11,11 @@ on:
       - "capacitor.config.json"
       - "package.json"
       - "package-lock.json"
+      - "scripts/**"
       - ".github/workflows/build-android-apk.yml"
+
+env:
+  TAMPER_EXPECTED_SHA1: "B2:B1:D0:5C:06:D4:27:19:B3:40:A0:16:BA:FA:09:E8:4E:F2:E8:AC"
 
 permissions:
   contents: read
@@ -52,13 +56,21 @@ jobs:
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
             keytool -genkeypair -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Tamper,C=MX" -keyalg RSA -keysize 2048 -validity 10000
           fi
-          SHA1=$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p')
+          SHA1=$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p' | head -1)
+          if [ "$SHA1" != "$TAMPER_EXPECTED_SHA1" ]; then
+            echo "La llave recuperada tiene SHA-1 $SHA1, pero Firebase espera $TAMPER_EXPECTED_SHA1." >&2
+            echo "No se compilará otro APK firmado incorrectamente." >&2
+            exit 1
+          fi
+          cp "$HOME/.android/debug.keystore" android/tamper-debug.keystore
           {
             echo "## Firma Android de prueba"
             echo ""
             echo "Paquete: \`com.tamper.rewards\`"
             echo ""
-            echo "SHA-1: \`$SHA1\`"
+            echo "SHA-1 preparada para Gradle: \`$SHA1\`"
+            echo ""
+            echo "✅ Coincide con la huella registrada en Firebase."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Instalar dependencias
@@ -112,15 +124,15 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       - name: Preparar archivo descargable
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.5-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.6-debug.apk
 
       - name: Verificar contenido nativo empaquetado
         shell: bash
         run: |
-          unzip -p Tamper-Rewards-v1.0.5-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
-          unzip -p Tamper-Rewards-v1.0.5-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
+          unzip -p Tamper-Rewards-v1.0.6-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
+          unzip -p Tamper-Rewards-v1.0.6-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
           grep -q 'FirebaseAuthenticationPlugin' /tmp/tamper-capacitor-plugins.json
-          grep -q '1.0.5-direct-id-token' /tmp/tamper-native-bridge.js
+          grep -q '1.0.6-fixed-apk-signature' /tmp/tamper-native-bridge.js
           grep -q "callNative('TamperGoogleAuth','signIn'" /tmp/tamper-native-bridge.js
           grep -q 'registerPlugin(TamperGoogleAuthPlugin.class)' android/app/src/main/java/com/tamper/rewards/MainActivity.java
           {
@@ -128,64 +140,60 @@ jobs:
             echo "## Contenido nativo"
             echo ""
             echo "✅ El APK contiene Firebase Authentication."
-            echo "✅ El APK contiene el acceso directo por ID token de Tamper Rewards 1.0.5."
+            echo "✅ El APK contiene el acceso directo por ID token de Tamper Rewards 1.0.6."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verificar firma y cliente OAuth del APK
         shell: bash
         run: |
-          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
-          APKSIGNER="$(command -v apksigner 2>/dev/null || true)"
-          if [ -z "$APKSIGNER" ] && [ -n "$SDK_ROOT" ] && [ -d "$SDK_ROOT/build-tools" ]; then
-            APKSIGNER="$(find "$SDK_ROOT/build-tools" \( -type f -o -type l \) -name apksigner -print 2>/dev/null | sort -V | tail -1 || true)"
-          fi
+          APK_SHA1="$(node scripts/apk-signature.mjs Tamper-Rewards-v1.0.6-debug.apk --sha1)"
+          KEY_SHA1="$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p' | head -1)"
+          export APK_SHA1 KEY_SHA1
 
-          APK_SHA1=""
-          if [ -n "$APKSIGNER" ]; then
-            echo "apksigner: $APKSIGNER"
-            APK_SHA1="$("$APKSIGNER" verify --print-certs Tamper-Rewards-v1.0.5-debug.apk 2>&1 | sed -n 's/^Signer #1 certificate SHA-1 digest: //p' | head -1 || true)"
-          else
-            echo "Aviso: no se encontró apksigner; se omitirá únicamente la comprobación posterior." >&2
-          fi
+          node <<'NODE'
+          const fs=require('fs');
+          const normalize=value=>String(value||'').replaceAll(':','').toUpperCase();
+          const expectedPackage='com.tamper.rewards';
+          const expectedSha=normalize(process.env.TAMPER_EXPECTED_SHA1);
+          const apkSha=normalize(process.env.APK_SHA1);
+          const keySha=normalize(process.env.KEY_SHA1);
+          if(!apkSha)throw new Error('No se pudo leer la firma real del APK');
+          if(apkSha!==keySha)throw new Error(`El APK quedó firmado con ${process.env.APK_SHA1}, no con la llave ${process.env.KEY_SHA1}`);
+          if(apkSha!==expectedSha)throw new Error(`La firma real ${process.env.APK_SHA1} no coincide con Firebase ${process.env.TAMPER_EXPECTED_SHA1}`);
 
-          KEY_SHA1="$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey 2>/dev/null | sed -n 's/^[[:space:]]*SHA1: //p' | head -1 || true)"
-          APK_SHA1_NORMALIZED=$(printf '%s' "$APK_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')
-          KEY_SHA1_NORMALIZED=$(printf '%s' "$KEY_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')
+          const config=JSON.parse(fs.readFileSync('android/app/google-services.json','utf8'));
+          const clients=Array.isArray(config.client)?config.client:[];
+          const androidClient=clients.find(client=>client?.client_info?.android_client_info?.package_name===expectedPackage);
+          const oauthClients=Array.isArray(androidClient?.oauth_client)?androidClient.oauth_client:[];
+          const matchingAndroid=oauthClients.find(client=>client?.client_type===1&&
+            client?.android_info?.package_name===expectedPackage&&
+            normalize(client?.android_info?.certificate_hash)===apkSha);
+          const webClient=oauthClients.find(client=>client?.client_type===3&&client?.client_id);
+          if(!matchingAndroid)throw new Error(`Firebase no contiene el APK ${expectedPackage} / ${process.env.APK_SHA1}`);
+          if(!webClient)throw new Error('Firebase no contiene el cliente OAuth web necesario para solicitar el ID token');
+          NODE
+
           OAUTH_RESOURCE="$(find android/app/build/generated/res -type f -name values.xml -path '*google-services*' -print -quit 2>/dev/null || true)"
-          HAS_OAUTH="false"
-          if [ -n "$OAUTH_RESOURCE" ] && grep -q 'default_web_client_id' "$OAUTH_RESOURCE"; then
-            HAS_OAUTH="true"
+          if [ -z "$OAUTH_RESOURCE" ] || ! grep -q 'default_web_client_id' "$OAUTH_RESOURCE"; then
+            echo "Android no generó default_web_client_id desde google-services.json." >&2
+            exit 1
           fi
-
-          echo "SHA-1 de la llave: ${KEY_SHA1:-no disponible}"
-          echo "SHA-1 del APK: ${APK_SHA1:-no disponible}"
-          echo "Recurso Google Services: ${OAUTH_RESOURCE:-no encontrado}"
-          echo "Cliente OAuth generado: $HAS_OAUTH"
 
           {
             echo ""
             echo "## Verificación del APK"
             echo ""
-            if [ -n "$APK_SHA1_NORMALIZED" ] && [ "$APK_SHA1_NORMALIZED" = "$KEY_SHA1_NORMALIZED" ]; then
-              echo "SHA-1 real del APK: \`$APK_SHA1\`"
-              echo ""
-              echo "✅ La firma real coincide con la registrada por el flujo."
-            elif [ -z "$APK_SHA1_NORMALIZED" ]; then
-              echo "⚠️ No se pudo leer la firma del APK en la comprobación posterior. El APK sí fue compilado y se publicará para permitir la prueba."
-            else
-              echo "⚠️ La firma leída del APK (\`$APK_SHA1\`) no coincide con la llave preparada (\`$KEY_SHA1\`)."
-            fi
-            if [ "$HAS_OAUTH" = "true" ]; then
-              echo "✅ Android generó \`default_web_client_id\` desde Firebase."
-            else
-              echo "⚠️ Android no generó \`default_web_client_id\`; revisa el archivo de Firebase antes de probar Google Sign-In."
-            fi
+            echo "SHA-1 real del APK: \`$APK_SHA1\`"
+            echo ""
+            echo "✅ La firma real del APK coincide con la llave y con Firebase."
+            echo "✅ Firebase contiene el cliente Android para este paquete y esta firma."
+            echo "✅ Android generó \`default_web_client_id\` desde Firebase."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Tamper-Rewards-APK-v1.0.5
-          path: Tamper-Rewards-v1.0.5-debug.apk
+          name: Tamper-Rewards-APK-v1.0.6
+          path: Tamper-Rewards-v1.0.6-debug.apk
           if-no-files-found: error
           retention-days: 14

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Tamper Rewards">
+  <circle cx="256" cy="256" r="174" fill="#EFEBE3"/>
+  <path d="M150 205h187v92c0 60-40 103-94 103s-93-43-93-103v-92Z" fill="#4A5D45"/>
+  <path d="M337 232h22c42 0 58 63 23 88-13 9-29 11-45 10" fill="none" stroke="#4A5D45" stroke-width="28" stroke-linecap="round"/>
+  <path d="M205 168c-16-24 18-33 3-57M261 168c-16-24 18-33 3-57M317 168c-16-24 18-33 3-57" fill="none" stroke="#4A5D45" stroke-width="18" stroke-linecap="round"/>
+</svg>

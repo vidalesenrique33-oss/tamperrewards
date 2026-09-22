@@ -1,0 +1,100 @@
+name: Construir APK Android
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "www/**"
+      - "android/**"
+      - "capacitor.config.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/build-android-apk.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  apk-debug:
+    name: APK de prueba
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Descargar proyecto
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - name: Conservar firma de prueba
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: tamper-rewards-debug-keystore-v1
+
+      - name: Preparar firma e informar SHA-1
+        shell: bash
+        run: |
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Tamper,C=MX" -keyalg RSA -keysize 2048 -validity 10000
+          fi
+          SHA1=$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p')
+          {
+            echo "## Firma Android de prueba"
+            echo ""
+            echo "Paquete: \`com.tamper.rewards\`"
+            echo ""
+            echo "SHA-1: \`$SHA1\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Verificar proyecto Tamper Rewards
+        run: npm run doctor
+
+      - name: Sincronizar Capacitor con Android
+        run: npm run sync -- android
+
+      - name: Revisar configuración de Firebase
+        shell: bash
+        run: |
+          if [ -f android/app/google-services.json ]; then
+            echo "Firebase Android configurado." >> "$GITHUB_STEP_SUMMARY"
+          else
+            {
+              echo ""
+              echo "> ⚠️ Falta \`android/app/google-services.json\`. El APK se puede instalar, pero Google Sign-In nativo no funcionará todavía."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Compilar APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Preparar archivo descargable
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-debug.apk
+
+      - name: Publicar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tamper-Rewards-APK
+          path: Tamper-Rewards-debug.apk
+          if-no-files-found: error
+          retention-days: 14

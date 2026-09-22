@@ -14,7 +14,28 @@
   document.documentElement.classList.toggle('native-app',native);
   if(!native)return;
 
-  const plugins=cap.Plugins||{};
+  // En proyectos sin bundler (HTML/JS directo), instalar el paquete nativo no
+  // crea automáticamente los proxies JavaScript. Los imports recomendados por
+  // Capacitor ejecutan registerPlugin(); aquí hacemos el equivalente explícito.
+  const registerNativePlugin=name=>{
+    const existing=cap.Plugins&&cap.Plugins[name];
+    if(existing)return existing;
+    if(typeof cap.registerPlugin!=='function')return null;
+    try{return cap.registerPlugin(name);}catch(error){
+      console.error(`[Tamper] No se pudo registrar el plugin ${name}`,error);
+      return null;
+    }
+  };
+  const plugins={};
+  [
+    'App',
+    'FirebaseAuthentication',
+    'Haptics',
+    'Keyboard',
+    'Network',
+    'SplashScreen',
+    'StatusBar',
+  ].forEach(name=>{plugins[name]=registerNativePlugin(name);});
   const themeColors={
     matcha:{color:'#F4F1E9',style:'DARK'},
     halloween:{color:'#120E13',style:'LIGHT'},
@@ -43,7 +64,8 @@
   };
   window.TamperNative.loginGoogle=async function(){
     const auth=plugins.FirebaseAuthentication;
-    if(!auth)throw new Error('Firebase Authentication no está incluido en esta compilación');
+    const available=typeof cap.isPluginAvailable!=='function'||cap.isPluginAvailable('FirebaseAuthentication');
+    if(!auth||!available)throw new Error('Firebase Authentication no está registrado en Android');
     let result;
     try{
       // En Android usamos primero el selector clásico. Credential Manager

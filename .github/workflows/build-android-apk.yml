@@ -173,11 +173,15 @@ jobs:
           if(!webClient)throw new Error('Firebase no contiene el cliente OAuth web necesario para solicitar el ID token');
           NODE
 
-          OAUTH_RESOURCE="$(find android/app/build/generated/res -type f -name values.xml -path '*google-services*' -print -quit 2>/dev/null || true)"
-          if [ -z "$OAUTH_RESOURCE" ] || ! grep -q 'default_web_client_id' "$OAUTH_RESOURCE"; then
+          # La carpeta cambia entre versiones de Android Gradle Plugin
+          # (google-services, processDebugGoogleServices, intermediates, etc.).
+          # Buscar el recurso por contenido evita depender de una ruta interna.
+          OAUTH_RESOURCE="$(grep -Rsl --include='*.xml' 'default_web_client_id' android/app/build/generated android/app/build/intermediates 2>/dev/null | head -1 || true)"
+          if [ -z "$OAUTH_RESOURCE" ]; then
             echo "Android no generó default_web_client_id desde google-services.json." >&2
             exit 1
           fi
+          echo "default_web_client_id localizado en: $OAUTH_RESOURCE"
 
           {
             echo ""

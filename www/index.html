@@ -4851,7 +4851,7 @@ Alpine.data('app',()=>({
       if(window.TamperNative?.active){
         const result=await window.TamperNative.loginGoogle();
         if(!result?.idToken)throw new Error('Google no devolvió una credencial válida');
-        const credential=GoogleAuthProvider.credential(result.idToken);
+        const credential=GoogleAuthProvider.credential(result.idToken,result.accessToken||undefined);
         await signInWithCredential(auth,credential);
         return;
       }
@@ -4863,9 +4863,10 @@ Alpine.data('app',()=>({
       const detail=`${code} ${raw}`.trim();
       if(/cancel|canceled|cancelled|user.*closed/i.test(detail))return;
       const setup=/default FirebaseApp|google-services|developer console|developer_error|10:|12500|28444/i.test(detail);
+      const errorLabel=(code||raw||'error desconocido').slice(0,110);
       const message=setup
         ?`Configuración de Google incompleta${code?` (${code})`:''}`
-        :`No se pudo iniciar sesión con Google${code?` (${code})`:''}`;
+        :`Google: ${errorLabel}`;
       try{localStorage.setItem('tamper:lastGoogleAuthError',JSON.stringify({code,raw,primary:e?.primaryError||'',at:new Date().toISOString()}));}catch(_){}
       this.toast2(message,'❌');
     }

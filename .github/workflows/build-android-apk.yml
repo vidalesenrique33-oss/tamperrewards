@@ -91,6 +91,32 @@ jobs:
       - name: Preparar archivo descargable
         run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-debug.apk
 
+      - name: Verificar firma y cliente OAuth del APK
+        shell: bash
+        run: |
+          APK_SHA1=$(keytool -printcert -jarfile Tamper-Rewards-debug.apk | sed -n 's/^[[:space:]]*SHA1: //p')
+          KEY_SHA1=$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p')
+          OAUTH_RESOURCE=$(find android/app/build/generated/res -type f -name values.xml -path '*google-services*' -print -quit)
+          {
+            echo ""
+            echo "## Verificación del APK"
+            echo ""
+            echo "SHA-1 real del APK: \`$APK_SHA1\`"
+            echo ""
+            if [ "$APK_SHA1" = "$KEY_SHA1" ]; then
+              echo "✅ La firma real coincide con la registrada por el flujo."
+            else
+              echo "❌ La firma real no coincide con la llave preparada."
+              exit 1
+            fi
+            if [ -n "$OAUTH_RESOURCE" ] && grep -q 'default_web_client_id' "$OAUTH_RESOURCE"; then
+              echo "✅ Android generó \`default_web_client_id\` desde Firebase."
+            else
+              echo "❌ Android no generó \`default_web_client_id\`."
+              exit 1
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:

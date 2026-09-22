@@ -94,8 +94,15 @@ jobs:
       - name: Verificar firma y cliente OAuth del APK
         shell: bash
         run: |
-          APK_SHA1=$(keytool -printcert -jarfile Tamper-Rewards-debug.apk | sed -n 's/^[[:space:]]*SHA1: //p')
+          APKSIGNER=$(find "$ANDROID_HOME/build-tools" -type f -name apksigner -print | sort -V | tail -1)
+          if [ -z "$APKSIGNER" ]; then
+            echo "No se encontró apksigner en el SDK de Android." >&2
+            exit 1
+          fi
+          APK_SHA1=$("$APKSIGNER" verify --print-certs Tamper-Rewards-debug.apk | sed -n 's/^Signer #1 certificate SHA-1 digest: //p')
           KEY_SHA1=$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p')
+          APK_SHA1_NORMALIZED=$(printf '%s' "$APK_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')
+          KEY_SHA1_NORMALIZED=$(printf '%s' "$KEY_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')
           OAUTH_RESOURCE=$(find android/app/build/generated/res -type f -name values.xml -path '*google-services*' -print -quit)
           {
             echo ""
@@ -103,7 +110,7 @@ jobs:
             echo ""
             echo "SHA-1 real del APK: \`$APK_SHA1\`"
             echo ""
-            if [ "$APK_SHA1" = "$KEY_SHA1" ]; then
+            if [ -n "$APK_SHA1_NORMALIZED" ] && [ "$APK_SHA1_NORMALIZED" = "$KEY_SHA1_NORMALIZED" ]; then
               echo "✅ La firma real coincide con la registrada por el flujo."
             else
               echo "❌ La firma real no coincide con la llave preparada."

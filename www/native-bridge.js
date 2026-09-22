@@ -1,7 +1,7 @@
 (function(){
   const cap=window.Capacitor;
   const native=!!(cap&&typeof cap.isNativePlatform==='function'&&cap.isNativePlatform());
-  window.__TAMPER_BUILD__='1.0.2-native-auth-rootfix';
+  window.__TAMPER_BUILD__='1.0.3-direct-native-bridge';
   window.__TAMPER_NATIVE__=native;
   window.TamperNative={
     active:native,
@@ -30,6 +30,17 @@
   // Resuelve cada plugin cuando se usa. Firebase se obtiene hasta que el
   // usuario toca el botón, cuando el Bridge de Android ya está completamente listo.
   const plugins=new Proxy({}, {get:(_,name)=>getNativePlugin(String(name))});
+  const callNative=async(pluginName,methodName,options={})=>{
+    // Ruta directa al Bridge de Capacitor. No depende de que el objeto
+    // window.Capacitor.Plugins haya sido exportado correctamente.
+    if(typeof cap.nativePromise==='function'){
+      return cap.nativePromise(pluginName,methodName,options);
+    }
+    const plugin=getNativePlugin(pluginName);
+    const method=plugin&&plugin[methodName];
+    if(typeof method==='function')return method.call(plugin,options);
+    throw new Error(`${pluginName}.${methodName} no está disponible · ${window.__TAMPER_BUILD__}`);
+  };
   const themeColors={
     matcha:{color:'#F4F1E9',style:'DARK'},
     halloween:{color:'#120E13',style:'LIGHT'},
@@ -57,22 +68,24 @@
     }catch(e){}
   };
   window.TamperNative.loginGoogle=async function(){
-    const auth=getNativePlugin('FirebaseAuthentication');
-    if(!auth||typeof auth.signInWithGoogle!=='function'){
-      throw new Error(`Firebase Authentication no está registrado en Android · ${window.__TAMPER_BUILD__}`);
-    }
     let result;
     try{
       // En Android usamos primero el selector clásico. Credential Manager
       // puede devolver NoCredentialException en algunos dispositivos antes
       // de presentar cualquier cuenta.
-      result=await auth.signInWithGoogle({skipNativeAuth:true,useCredentialManager:false});
+      result=await callNative('FirebaseAuthentication','signInWithGoogle',{
+        skipNativeAuth:true,
+        useCredentialManager:false,
+      });
     }catch(primaryError){
       const primaryMessage=String(primaryError?.message||primaryError||'');
       const primaryCode=String(primaryError?.code||'');
       if(/cancel|canceled|cancelled|user.*closed/i.test(`${primaryCode} ${primaryMessage}`))throw primaryError;
       try{
-        result=await auth.signInWithGoogle({skipNativeAuth:true,useCredentialManager:true});
+        result=await callNative('FirebaseAuthentication','signInWithGoogle',{
+          skipNativeAuth:true,
+          useCredentialManager:true,
+        });
       }catch(fallbackError){
         const fallbackMessage=String(fallbackError?.message||fallbackError||'Error desconocido');
         const fallbackCode=String(fallbackError?.code||primaryCode||'GOOGLE_SIGN_IN_FAILED');
@@ -87,7 +100,7 @@
     return {idToken,accessToken:result?.credential?.accessToken||''};
   };
   window.TamperNative.logoutGoogle=async function(){
-    try{await plugins.FirebaseAuthentication?.signOut();}catch(e){}
+    try{await callNative('FirebaseAuthentication','signOut',{});}catch(e){}
   };
 
   new MutationObserver(()=>window.TamperNative.setTheme(currentTheme()))

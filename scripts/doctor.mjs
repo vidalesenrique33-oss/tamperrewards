@@ -23,12 +23,13 @@ assert.equal(pkg.dependencies['@capacitor-firebase/authentication'],'^8.5.2');
 assert.deepEqual(cap.plugins.FirebaseAuthentication.providers,['google.com']);
 assert.equal(cap.plugins.FirebaseAuthentication.skipNativeAuth,true);
 assert.match(html,/signInWithCredential/,'Falta enlazar la credencial nativa con Firebase web');
-assert.match(nativeBridge,/auth\.signInWithGoogle/,'Falta Google Sign-In nativo');
+assert.match(nativeBridge,/callNative\('FirebaseAuthentication','signInWithGoogle'/,'Falta Google Sign-In nativo directo');
 assert.match(nativeBridge,/registerPlugin\(name\)/,'Los plugins nativos deben registrarse en una app sin bundler');
-assert.match(nativeBridge,/1\.0\.2-native-auth-rootfix/,'Falta la marca verificable de esta compilación');
+assert.match(nativeBridge,/1\.0\.3-direct-native-bridge/,'Falta la marca verificable de esta compilación');
+assert.match(nativeBridge,/cap\.nativePromise\(pluginName,methodName,options\)/,'Google debe usar directamente el Bridge nativo');
 assert.match(nativeBridge,/useCredentialManager:false/,'Falta respaldo de Google Sign-In para Android');
 assert.match(mainActivity,/registerPlugin\(FirebaseAuthenticationPlugin\.class\)/,'MainActivity debe registrar Firebase Authentication explícitamente');
-assert.match(read('android/app/build.gradle'),/versionCode\s+3/,'Android debe generar una actualización distinguible');
+assert.match(read('android/app/build.gradle'),/versionCode\s+4/,'Android debe generar una actualización distinguible');
 assert.match(read('android/variables.gradle'),/androidxCredentialsVersion\s*=\s*'1\.6\.0'/,'Versión principal de Credential Manager incorrecta');
 assert.match(read('android/variables.gradle'),/androidxCredentialsPlayServicesAuthVersion\s*=\s*'1\.6\.0'/,'Las bibliotecas de Credential Manager deben usar la misma versión');
 assert.match(androidWorkflow,/java-version:\s*["']21["']/,'El constructor Android debe usar Java 21');
@@ -68,6 +69,13 @@ const capacitor={
     return plugin;
   },
   isPluginAvailable:name=>registered.includes(name),
+  async nativePromise(pluginName,methodName,options){
+    googleCalls.push({pluginName,methodName,options});
+    if(pluginName==='FirebaseAuthentication'&&methodName==='signInWithGoogle'){
+      return {credential:{idToken:'tamper-test-token',accessToken:'tamper-test-access'}};
+    }
+    return {};
+  },
 };
 const documentElement={
   classList:{toggle:()=>{},add:()=>{},remove:()=>{}},
@@ -86,8 +94,9 @@ sandbox.window={Capacitor:capacitor,dispatchEvent:()=>{}};
 vm.createContext(sandbox);
 nativeBridgeScript.runInContext(sandbox);
 const nativeCredential=await sandbox.window.TamperNative.loginGoogle();
-assert.ok(registered.includes('FirebaseAuthentication'),'FirebaseAuthentication no se registró al arrancar');
 assert.equal(googleCalls.length,1,'Google Sign-In nativo no fue invocado exactamente una vez');
-assert.equal(googleCalls[0].useCredentialManager,false,'Android debe intentar primero el selector clásico');
+assert.equal(googleCalls[0].pluginName,'FirebaseAuthentication');
+assert.equal(googleCalls[0].methodName,'signInWithGoogle');
+assert.equal(googleCalls[0].options.useCredentialManager,false,'Android debe intentar primero el selector clásico');
 assert.equal(nativeCredential.idToken,'tamper-test-token');
 console.log('Tamper Rewards Mobile: estructura, identificador, puente nativo y plataformas correctos.');

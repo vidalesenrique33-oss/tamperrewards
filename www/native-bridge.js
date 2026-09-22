@@ -1,7 +1,7 @@
 (function(){
   const cap=window.Capacitor;
   const native=!!(cap&&typeof cap.isNativePlatform==='function'&&cap.isNativePlatform());
-  window.__TAMPER_BUILD__='1.0.6-fixed-apk-signature';
+  window.__TAMPER_BUILD__='1.0.7-push-receiver';
   window.__TAMPER_NATIVE__=native;
   window.TamperNative={
     active:native,
@@ -11,6 +11,8 @@
     setTheme:async()=>{},
     loginGoogle:async()=>{throw new Error('Inicio de sesión nativo no disponible');},
     logoutGoogle:async()=>{},
+    getPushPermission:async()=>({receive:'denied'}),
+    enablePush:async()=>({receive:'denied'}),
   };
   document.documentElement.classList.toggle('native-app',native);
   if(!native)return;
@@ -40,6 +42,31 @@
     const method=plugin&&plugin[methodName];
     if(typeof method==='function')return method.call(plugin,options);
     throw new Error(`${pluginName}.${methodName} no está disponible · ${window.__TAMPER_BUILD__}`);
+  };
+  let pushListenersReady=false;
+  const emitPush=(name,detail)=>{
+    if(name==='tamper:push-token')window.__TAMPER_PUSH_TOKEN__=detail;
+    if(name==='tamper:push-action')window.__TAMPER_PENDING_PUSH_ACTION__=detail;
+    window.dispatchEvent(new CustomEvent(name,{detail}));
+  };
+  const ensurePushListeners=async()=>{
+    if(pushListenersReady)return;
+    const push=getNativePlugin('PushNotifications');
+    if(!push||typeof push.addListener!=='function')throw new Error('PushNotifications no está disponible');
+    await push.addListener('registration',token=>{
+      emitPush('tamper:push-token',{value:token?.value||'',platform:cap.getPlatform?cap.getPlatform():'android'});
+    });
+    await push.addListener('registrationError',error=>{
+      emitPush('tamper:push-error',{message:error?.error||error?.message||'No se pudo registrar el teléfono'});
+    });
+    await push.addListener('pushNotificationReceived',notification=>{
+      emitPush('tamper:push-received',{notification,data:notification?.data||{}});
+    });
+    await push.addListener('pushNotificationActionPerformed',action=>{
+      const notification=action?.notification||{};
+      emitPush('tamper:push-action',{notification,data:notification?.data||{},actionId:action?.actionId||'tap'});
+    });
+    pushListenersReady=true;
   };
   const themeColors={
     matcha:{color:'#F4F1E9',style:'DARK'},
@@ -83,6 +110,32 @@
   window.TamperNative.logoutGoogle=async function(){
     try{await callNative('TamperGoogleAuth','signOut',{});}catch(e){}
     try{await callNative('FirebaseAuthentication','signOut',{});}catch(e){}
+  };
+  window.TamperNative.getPushPermission=async function(){
+    const push=getNativePlugin('PushNotifications');
+    if(!push||typeof push.checkPermissions!=='function')return {receive:'denied'};
+    await ensurePushListeners();
+    return push.checkPermissions();
+  };
+  window.TamperNative.enablePush=async function(){
+    const push=getNativePlugin('PushNotifications');
+    if(!push)throw new Error('PushNotifications no está incluido en esta compilación');
+    await ensurePushListeners();
+    let permission=await push.checkPermissions();
+    if(String(permission?.receive||'').startsWith('prompt'))permission=await push.requestPermissions();
+    if(permission?.receive!=='granted')return permission;
+    try{
+      await push.createChannel({
+        id:'tamper_updates',
+        name:'Pedidos, recompensas y promociones',
+        description:'Estados de Pick & Go, recompensas, promociones y recordatorios de Tamper',
+        importance:5,
+        visibility:1,
+        vibration:true,
+      });
+    }catch(error){console.warn('[Tamper] No se pudo crear el canal de notificaciones',error);}
+    await push.register();
+    return permission;
   };
 
   new MutationObserver(()=>window.TamperNative.setTheme(currentTheme()))

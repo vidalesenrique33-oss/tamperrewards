@@ -124,29 +124,32 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       - name: Preparar archivo descargable
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.6-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.7-debug.apk
 
       - name: Verificar contenido nativo empaquetado
         shell: bash
         run: |
-          unzip -p Tamper-Rewards-v1.0.6-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
-          unzip -p Tamper-Rewards-v1.0.6-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
+          unzip -p Tamper-Rewards-v1.0.7-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
+          unzip -p Tamper-Rewards-v1.0.7-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
           grep -q 'FirebaseAuthenticationPlugin' /tmp/tamper-capacitor-plugins.json
-          grep -q '1.0.6-fixed-apk-signature' /tmp/tamper-native-bridge.js
+          grep -q 'PushNotificationsPlugin' /tmp/tamper-capacitor-plugins.json
+          grep -q '1.0.7-push-receiver' /tmp/tamper-native-bridge.js
           grep -q "callNative('TamperGoogleAuth','signIn'" /tmp/tamper-native-bridge.js
+          grep -q "getNativePlugin('PushNotifications')" /tmp/tamper-native-bridge.js
           grep -q 'registerPlugin(TamperGoogleAuthPlugin.class)' android/app/src/main/java/com/tamper/rewards/MainActivity.java
           {
             echo ""
             echo "## Contenido nativo"
             echo ""
             echo "✅ El APK contiene Firebase Authentication."
-            echo "✅ El APK contiene el acceso directo por ID token de Tamper Rewards 1.0.6."
+            echo "✅ El APK contiene el acceso directo por ID token de Tamper Rewards 1.0.7."
+            echo "✅ El APK contiene Firebase Cloud Messaging y el receptor de notificaciones push."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verificar firma y cliente OAuth del APK
         shell: bash
         run: |
-          APK_SHA1="$(node scripts/apk-signature.mjs Tamper-Rewards-v1.0.6-debug.apk --sha1)"
+          APK_SHA1="$(node scripts/apk-signature.mjs Tamper-Rewards-v1.0.7-debug.apk --sha1)"
           KEY_SHA1="$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p' | head -1)"
           export APK_SHA1 KEY_SHA1
 
@@ -197,7 +200,7 @@ jobs:
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Tamper-Rewards-APK-v1.0.6
-          path: Tamper-Rewards-v1.0.6-debug.apk
+          name: Tamper-Rewards-APK-v1.0.7
+          path: Tamper-Rewards-v1.0.7-debug.apk
           if-no-files-found: error
           retention-days: 14

@@ -21,23 +21,31 @@ const nativeBridge=read('www/native-bridge.js');
 const nativeBridgeScript=new vm.Script(nativeBridge,{filename:'native-bridge.js'});
 assert.equal(pkg.dependencies['@capacitor/core'],'8.5.2');
 assert.equal(pkg.dependencies['@capacitor-firebase/authentication'],'^8.5.2');
+assert.equal(pkg.dependencies['@capacitor/push-notifications'],'^8.1.2');
+assert.equal(pkg.version,'1.0.7');
 assert.deepEqual(cap.plugins.FirebaseAuthentication.providers,['google.com']);
 assert.equal(cap.plugins.FirebaseAuthentication.skipNativeAuth,true);
 assert.match(html,/signInWithCredential/,'Falta enlazar la credencial nativa con Firebase web');
 assert.match(nativeBridge,/callNative\('TamperGoogleAuth','signIn'/,'Falta Google Sign-In nativo directo');
 assert.match(nativeBridge,/registerPlugin\(name\)/,'Los plugins nativos deben registrarse en una app sin bundler');
-assert.match(nativeBridge,/1\.0\.6-fixed-apk-signature/,'Falta la marca verificable de esta compilación');
+assert.match(nativeBridge,/1\.0\.7-push-receiver/,'Falta la marca verificable de esta compilación');
+assert.match(nativeBridge,/getNativePlugin\('PushNotifications'\)/,'Falta registrar el receptor nativo de notificaciones');
+assert.match(nativeBridge,/pushNotificationActionPerformed/,'Falta manejar el toque de una notificación');
+assert.match(html,/tamper_clients',uid,'devices'/,'Falta guardar el dispositivo bajo el usuario');
+assert.match(html,/pushToken:token/,'Falta el respaldo del token en el documento principal del cliente');
+assert.match(html,/type==='pickgo_status'/,'Falta abrir el seguimiento desde una notificación Pick & Go');
 assert.match(nativeBridge,/cap\.nativePromise\(pluginName,methodName,options\)/,'Google debe usar directamente el Bridge nativo');
 assert.match(mainActivity,/registerPlugin\(FirebaseAuthenticationPlugin\.class\)/,'MainActivity debe registrar Firebase Authentication explícitamente');
 assert.match(mainActivity,/registerPlugin\(TamperGoogleAuthPlugin\.class\)/,'MainActivity debe registrar el acceso minimo de Google');
 assert.match(tamperGooglePlugin,/requestIdToken\(webClientId\)/,'El puente debe solicitar el ID token');
 assert.doesNotMatch(tamperGooglePlugin,/requestServerAuthCode|GoogleAuthUtil\.getToken/,'El puente no debe pedir credenciales que Tamper no usa');
 const androidBuild=read('android/app/build.gradle');
-assert.match(androidBuild,/versionCode\s+7/,'Android debe generar una actualización distinguible');
+assert.match(androidBuild,/versionCode\s+8/,'Android debe generar una actualización distinguible');
 assert.match(androidBuild,/rootProject\.file\(['"]tamper-debug\.keystore['"]\)/,'Gradle debe usar la llave estable explícita');
 assert.match(androidBuild,/debug\s*\{[\s\S]*signingConfig\s+signingConfigs\.tamperDebug/,'La compilación debug debe fijar su firma');
 assert.match(read('android/app/build.gradle'),/play-services-auth/,'La app debe compilar el selector de cuentas de Google');
 assert.match(read('android/variables.gradle'),/playServicesAuthVersion\s*=\s*'20\.7\.0'/,'Falta fijar la versión de Google Sign-In');
+assert.match(read('android/variables.gradle'),/firebaseMessagingVersion\s*=\s*'25\.0\.1'/,'Falta fijar la versión de Firebase Messaging');
 assert.match(read('android/variables.gradle'),/androidxCredentialsVersion\s*=\s*'1\.6\.0'/,'Versión principal de Credential Manager incorrecta');
 assert.match(read('android/variables.gradle'),/androidxCredentialsPlayServicesAuthVersion\s*=\s*'1\.6\.0'/,'Las bibliotecas de Credential Manager deben usar la misma versión');
 assert.match(androidWorkflow,/java-version:\s*["']21["']/,'El constructor Android debe usar Java 21');
@@ -54,6 +62,7 @@ for(const platform of ['android','ios']){
 // invocar FirebaseAuthentication.
 const registered=[];
 const googleCalls=[];
+const pushCalls=[];
 const makePlugin=name=>{
   if(name==='TamperGoogleAuth')return {
     signIn:async options=>{
@@ -66,6 +75,13 @@ const makePlugin=name=>{
   if(name==='Network')return {
     getStatus:async()=>({connected:true}),
     addListener:async()=>({remove:async()=>{}}),
+  };
+  if(name==='PushNotifications')return {
+    checkPermissions:async()=>{pushCalls.push('checkPermissions');return {receive:'granted'};},
+    requestPermissions:async()=>{pushCalls.push('requestPermissions');return {receive:'granted'};},
+    createChannel:async options=>{pushCalls.push({createChannel:options});},
+    register:async()=>{pushCalls.push('register');},
+    addListener:async eventName=>{pushCalls.push({addListener:eventName});return {remove:async()=>{}};},
   };
   return new Proxy({}, {get:()=>async()=>({remove:async()=>{}})});
 };
@@ -110,4 +126,9 @@ assert.equal(googleCalls.length,1,'Google Sign-In nativo no fue invocado exactam
 assert.equal(googleCalls[0].pluginName,'TamperGoogleAuth');
 assert.equal(googleCalls[0].methodName,'signIn');
 assert.equal(nativeCredential.idToken,'tamper-test-token');
+const pushPermission=await sandbox.window.TamperNative.enablePush();
+assert.equal(pushPermission.receive,'granted');
+assert.equal(pushCalls.filter(call=>call?.addListener).length,4,'Deben registrarse los cuatro eventos push nativos');
+assert.ok(pushCalls.some(call=>call?.createChannel?.id==='tamper_updates'),'Falta crear el canal Android de Tamper');
+assert.ok(pushCalls.includes('register'),'La app no intentó registrar el token FCM');
 console.log('Tamper Rewards Mobile: estructura, identificador, puente nativo y plataformas correctos.');

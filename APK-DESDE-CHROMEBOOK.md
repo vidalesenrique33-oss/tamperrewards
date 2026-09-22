@@ -32,9 +32,9 @@ carpeta `.github`, que contiene el constructor del APK.
 3. Presiona **Run workflow** y nuevamente **Run workflow**.
 4. Espera a que el proceso muestre una marca verde.
 5. Abre la ejecución terminada y, en **Artifacts**, descarga
-   `Tamper-Rewards-APK-v1.0.6`.
+   `Tamper-Rewards-APK-v1.0.7`.
 6. Extrae el ZIP descargado. Dentro estará
-   `Tamper-Rewards-v1.0.6-debug.apk`.
+   `Tamper-Rewards-v1.0.7-debug.apk`.
 
 Para instalarlo en un teléfono Android, transfiere el APK al teléfono, ábrelo y
 autoriza temporalmente la instalación desde esa fuente cuando Android lo pida.
@@ -52,7 +52,7 @@ También puedes iniciarlo manualmente desde **Actions**.
 
 ## Alcance de este APK
 
-`Tamper-Rewards-v1.0.6-debug.apk` sirve para probar e instalar directamente. No es el
+`Tamper-Rewards-v1.0.7-debug.apk` sirve para probar e instalar directamente. No es el
 archivo final para Google Play. La tienda requiere un AAB firmado con una llave
 privada y una ficha de publicación.
 

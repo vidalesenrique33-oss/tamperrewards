@@ -10,6 +10,7 @@ ext {
     coreSplashScreenVersion = '1.2.0'
     androidxWebkitVersion = '1.14.0'
     rgcfaIncludeGoogle = true
+    firebaseMessagingVersion = '25.0.1'
     playServicesAuthVersion = '20.7.0'
     androidxCredentialsVersion = '1.6.0'
     androidxCredentialsPlayServicesAuthVersion = '1.6.0'

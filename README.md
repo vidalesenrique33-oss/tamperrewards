@@ -44,14 +44,19 @@ Android se abre con Android Studio. iOS se abre con Xcode en una Mac.
 El repositorio incluye `.github/workflows/build-android-apk.yml`. Ese flujo usa
 GitHub Actions para generar un APK Android de prueba sin instalar Android Studio
 en el Chromebook. Sigue `APK-DESDE-CHROMEBOOK.md`; al terminar podrás descargar
-el artefacto `Tamper-Rewards-APK-v1.0.6` con el archivo
-`Tamper-Rewards-v1.0.6-debug.apk`.
+el artefacto `Tamper-Rewards-APK-v1.0.7` con el archivo
+`Tamper-Rewards-v1.0.7-debug.apk`.
 
 Esta entrega es el código fuente móvil completo, no un APK ni un IPA firmado.
 El APK de prueba puede generarse con GitHub Actions. Una publicación de Android
 requiere una firma privada y un AAB; iOS requiere Xcode en una Mac. En Android,
 el selector de Google es nativo y entrega su ID token a la sesión web existente
 de Firebase.
+
+La versión 1.0.7 registra el teléfono en Firebase Cloud Messaging, guarda el
+dispositivo bajo el usuario y reconoce destinos para Pick & Go, promociones,
+recompensas, recordatorios y notificaciones automáticas. Consulta
+`PUSH-NOTIFICATIONS.md` para el formato que deben usar las funciones servidoras.
 
 ## Fuente web
 

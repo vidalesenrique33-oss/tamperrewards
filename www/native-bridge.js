@@ -1,6 +1,7 @@
 (function(){
   const cap=window.Capacitor;
   const native=!!(cap&&typeof cap.isNativePlatform==='function'&&cap.isNativePlatform());
+  window.__TAMPER_BUILD__='1.0.2-native-auth-rootfix';
   window.__TAMPER_NATIVE__=native;
   window.TamperNative={
     active:native,
@@ -17,7 +18,7 @@
   // En proyectos sin bundler (HTML/JS directo), instalar el paquete nativo no
   // crea automáticamente los proxies JavaScript. Los imports recomendados por
   // Capacitor ejecutan registerPlugin(); aquí hacemos el equivalente explícito.
-  const registerNativePlugin=name=>{
+  const getNativePlugin=name=>{
     const existing=cap.Plugins&&cap.Plugins[name];
     if(existing)return existing;
     if(typeof cap.registerPlugin!=='function')return null;
@@ -26,16 +27,9 @@
       return null;
     }
   };
-  const plugins={};
-  [
-    'App',
-    'FirebaseAuthentication',
-    'Haptics',
-    'Keyboard',
-    'Network',
-    'SplashScreen',
-    'StatusBar',
-  ].forEach(name=>{plugins[name]=registerNativePlugin(name);});
+  // Resuelve cada plugin cuando se usa. Firebase se obtiene hasta que el
+  // usuario toca el botón, cuando el Bridge de Android ya está completamente listo.
+  const plugins=new Proxy({}, {get:(_,name)=>getNativePlugin(String(name))});
   const themeColors={
     matcha:{color:'#F4F1E9',style:'DARK'},
     halloween:{color:'#120E13',style:'LIGHT'},
@@ -63,9 +57,10 @@
     }catch(e){}
   };
   window.TamperNative.loginGoogle=async function(){
-    const auth=plugins.FirebaseAuthentication;
-    const available=typeof cap.isPluginAvailable!=='function'||cap.isPluginAvailable('FirebaseAuthentication');
-    if(!auth||!available)throw new Error('Firebase Authentication no está registrado en Android');
+    const auth=getNativePlugin('FirebaseAuthentication');
+    if(!auth||typeof auth.signInWithGoogle!=='function'){
+      throw new Error(`Firebase Authentication no está registrado en Android · ${window.__TAMPER_BUILD__}`);
+    }
     let result;
     try{
       // En Android usamos primero el selector clásico. Credential Manager

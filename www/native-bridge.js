@@ -44,7 +44,27 @@
   window.TamperNative.loginGoogle=async function(){
     const auth=plugins.FirebaseAuthentication;
     if(!auth)throw new Error('Firebase Authentication no está incluido en esta compilación');
-    const result=await auth.signInWithGoogle({skipNativeAuth:true});
+    let result;
+    try{
+      // Credential Manager es el flujo moderno de Android, pero algunos
+      // dispositivos/cuentas pueden devolver NoCredentialException antes de
+      // mostrar el selector. En ese caso usamos el selector clásico oficial.
+      result=await auth.signInWithGoogle({skipNativeAuth:true,useCredentialManager:true});
+    }catch(primaryError){
+      const primaryMessage=String(primaryError?.message||primaryError||'');
+      const primaryCode=String(primaryError?.code||'');
+      if(/cancel|canceled|cancelled|user.*closed/i.test(`${primaryCode} ${primaryMessage}`))throw primaryError;
+      try{
+        result=await auth.signInWithGoogle({skipNativeAuth:true,useCredentialManager:false});
+      }catch(fallbackError){
+        const fallbackMessage=String(fallbackError?.message||fallbackError||'Error desconocido');
+        const fallbackCode=String(fallbackError?.code||primaryCode||'GOOGLE_SIGN_IN_FAILED');
+        const error=new Error(fallbackMessage);
+        error.code=fallbackCode;
+        error.primaryError=`${primaryCode} ${primaryMessage}`.trim();
+        throw error;
+      }
+    }
     const idToken=result?.credential?.idToken;
     if(!idToken)throw new Error('Google no devolvió el token de identidad');
     return {idToken};

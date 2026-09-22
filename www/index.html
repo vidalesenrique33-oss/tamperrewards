@@ -4859,8 +4859,15 @@ Alpine.data('app',()=>({
     }catch(e){
       console.error('Google Sign-In:',e);
       const raw=String(e?.message||e||'');
-      const setup=/default FirebaseApp|google-services|developer console|10:|12500|28444/i.test(raw);
-      this.toast2(setup?'Falta terminar la configuración de Google en esta versión':'No se pudo iniciar sesión con Google','❌');
+      const code=String(e?.code||'').replace(/^auth\//,'');
+      const detail=`${code} ${raw}`.trim();
+      if(/cancel|canceled|cancelled|user.*closed/i.test(detail))return;
+      const setup=/default FirebaseApp|google-services|developer console|developer_error|10:|12500|28444/i.test(detail);
+      const message=setup
+        ?`Configuración de Google incompleta${code?` (${code})`:''}`
+        :`No se pudo iniciar sesión con Google${code?` (${code})`:''}`;
+      try{localStorage.setItem('tamper:lastGoogleAuthError',JSON.stringify({code,raw,primary:e?.primaryError||'',at:new Date().toISOString()}));}catch(_){}
+      this.toast2(message,'❌');
     }
   },
   async logout(){

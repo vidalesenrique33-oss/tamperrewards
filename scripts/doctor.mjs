@@ -22,6 +22,7 @@ assert.deepEqual(cap.plugins.FirebaseAuthentication.providers,['google.com']);
 assert.equal(cap.plugins.FirebaseAuthentication.skipNativeAuth,true);
 assert.match(html,/signInWithCredential/,'Falta enlazar la credencial nativa con Firebase web');
 assert.match(read('www/native-bridge.js'),/auth\.signInWithGoogle/,'Falta Google Sign-In nativo');
+assert.match(read('www/native-bridge.js'),/useCredentialManager:false/,'Falta respaldo de Google Sign-In para Android');
 assert.match(androidWorkflow,/java-version:\s*["']21["']/,'El constructor Android debe usar Java 21');
 assert.match(androidWorkflow,/debug\.keystore/,'El constructor debe conservar una firma de prueba estable');
 for(const platform of ['android','ios']){

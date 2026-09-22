@@ -32,8 +32,9 @@ carpeta `.github`, que contiene el constructor del APK.
 3. Presiona **Run workflow** y nuevamente **Run workflow**.
 4. Espera a que el proceso muestre una marca verde.
 5. Abre la ejecución terminada y, en **Artifacts**, descarga
-   `Tamper-Rewards-APK`.
-6. Extrae el ZIP descargado. Dentro estará `Tamper-Rewards-debug.apk`.
+   `Tamper-Rewards-APK-v1.0.5`.
+6. Extrae el ZIP descargado. Dentro estará
+   `Tamper-Rewards-v1.0.5-debug.apk`.
 
 Para instalarlo en un teléfono Android, transfiere el APK al teléfono, ábrelo y
 autoriza temporalmente la instalación desde esa fuente cuando Android lo pida.
@@ -46,12 +47,13 @@ También puedes iniciarlo manualmente desde **Actions**.
 
 ## Alcance de este APK
 
-`Tamper-Rewards-debug.apk` sirve para probar e instalar directamente. No es el
+`Tamper-Rewards-v1.0.5-debug.apk` sirve para probar e instalar directamente. No es el
 archivo final para Google Play. La tienda requiere un AAB firmado con una llave
 privada y una ficha de publicación.
 
-El APK puede construirse sin los archivos nativos de Firebase, pero el inicio de
-sesión nativo con Google y las notificaciones no estarán terminados hasta agregar:
+El constructor se detiene si falta el archivo Android de Firebase, porque no se
+debe publicar otro APK en el que Google Sign-In quede incompleto. Antes de
+compilar agrega:
 
 - `android/app/google-services.json`
 - `ios/App/App/GoogleService-Info.plist`

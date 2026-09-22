@@ -1,7 +1,7 @@
 (function(){
   const cap=window.Capacitor;
   const native=!!(cap&&typeof cap.isNativePlatform==='function'&&cap.isNativePlatform());
-  window.__TAMPER_BUILD__='1.0.4-google-oauth-diagnostics';
+  window.__TAMPER_BUILD__='1.0.5-direct-id-token';
   window.__TAMPER_NATIVE__=native;
   window.TamperNative={
     active:native,
@@ -68,50 +68,20 @@
     }catch(e){}
   };
   window.TamperNative.loginGoogle=async function(){
-    let result;
-    let credentialManagerError=null;
-    try{
-      // Credential Manager es el flujo actual recomendado por Android y no
-      // necesita solicitar un access token legado para completar el acceso.
-      result=await callNative('FirebaseAuthentication','signInWithGoogle',{
-        skipNativeAuth:true,
-        useCredentialManager:true,
-      });
-    }catch(primaryError){
-      credentialManagerError=primaryError;
-      const primaryMessage=String(primaryError?.message||primaryError||'Error desconocido');
-      const primaryCode=String(primaryError?.code||'');
-      const primaryDetail=`${primaryCode} ${primaryMessage}`.trim();
-      if(/cancel|canceled|cancelled|user.*closed/i.test(primaryDetail))throw primaryError;
-
-      // Algunos equipos no tienen una credencial disponible para Credential
-      // Manager. En ese caso intentamos el selector clásico de Google.
-      try{
-        result=await callNative('FirebaseAuthentication','signInWithGoogle',{
-          skipNativeAuth:true,
-          useCredentialManager:false,
-        });
-      }catch(fallbackError){
-        const fallbackMessage=String(fallbackError?.message||fallbackError||'Error desconocido');
-        const fallbackCode=String(fallbackError?.code||'');
-        const fallbackDetail=`${fallbackCode} ${fallbackMessage}`.trim();
-        const error=new Error(`Credential Manager: ${primaryDetail} | Google clásico: ${fallbackDetail}`);
-        error.code=fallbackCode||primaryCode||'GOOGLE_SIGN_IN_FAILED';
-        error.primaryError=primaryDetail;
-        error.fallbackError=fallbackDetail;
-        throw error;
-      }
-    }
-    const idToken=result?.credential?.idToken;
+    // Puente propio de Android: pide solo el ID token. El complemento generico
+    // tambien intentaba conseguir access token y server auth code, que Tamper
+    // no utiliza y podian hacer fallar todo el proceso despues de elegir cuenta.
+    const result=await callNative('TamperGoogleAuth','signIn',{});
+    const idToken=result?.idToken;
     if(!idToken){
       const error=new Error('Google no devolvió el token de identidad');
       error.code='MISSING_ID_TOKEN';
-      error.primaryError=String(credentialManagerError?.message||'');
       throw error;
     }
-    return {idToken,accessToken:result?.credential?.accessToken||''};
+    return {idToken,accessToken:''};
   };
   window.TamperNative.logoutGoogle=async function(){
+    try{await callNative('TamperGoogleAuth','signOut',{});}catch(e){}
     try{await callNative('FirebaseAuthentication','signOut',{});}catch(e){}
   };
 

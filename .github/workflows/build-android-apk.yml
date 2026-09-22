@@ -112,22 +112,23 @@ jobs:
           ./gradlew assembleDebug --no-daemon
 
       - name: Preparar archivo descargable
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.4-debug.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.5-debug.apk
 
       - name: Verificar contenido nativo empaquetado
         shell: bash
         run: |
-          unzip -p Tamper-Rewards-v1.0.4-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
-          unzip -p Tamper-Rewards-v1.0.4-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
+          unzip -p Tamper-Rewards-v1.0.5-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
+          unzip -p Tamper-Rewards-v1.0.5-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
           grep -q 'FirebaseAuthenticationPlugin' /tmp/tamper-capacitor-plugins.json
-          grep -q '1.0.4-google-oauth-diagnostics' /tmp/tamper-native-bridge.js
-          grep -q 'cap.nativePromise(pluginName,methodName,options)' /tmp/tamper-native-bridge.js
+          grep -q '1.0.5-direct-id-token' /tmp/tamper-native-bridge.js
+          grep -q "callNative('TamperGoogleAuth','signIn'" /tmp/tamper-native-bridge.js
+          grep -q 'registerPlugin(TamperGoogleAuthPlugin.class)' android/app/src/main/java/com/tamper/rewards/MainActivity.java
           {
             echo ""
             echo "## Contenido nativo"
             echo ""
             echo "✅ El APK contiene Firebase Authentication."
-            echo "✅ El APK contiene el puente nativo y diagnóstico OAuth Tamper Rewards 1.0.4."
+            echo "✅ El APK contiene el acceso directo por ID token de Tamper Rewards 1.0.5."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verificar firma y cliente OAuth del APK
@@ -142,7 +143,7 @@ jobs:
           APK_SHA1=""
           if [ -n "$APKSIGNER" ]; then
             echo "apksigner: $APKSIGNER"
-            APK_SHA1="$("$APKSIGNER" verify --print-certs Tamper-Rewards-v1.0.4-debug.apk 2>&1 | sed -n 's/^Signer #1 certificate SHA-1 digest: //p' | head -1 || true)"
+            APK_SHA1="$("$APKSIGNER" verify --print-certs Tamper-Rewards-v1.0.5-debug.apk 2>&1 | sed -n 's/^Signer #1 certificate SHA-1 digest: //p' | head -1 || true)"
           else
             echo "Aviso: no se encontró apksigner; se omitirá únicamente la comprobación posterior." >&2
           fi
@@ -184,7 +185,7 @@ jobs:
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Tamper-Rewards-APK-v1.0.4
-          path: Tamper-Rewards-v1.0.4-debug.apk
+          name: Tamper-Rewards-APK-v1.0.5
+          path: Tamper-Rewards-v1.0.5-debug.apk
           if-no-files-found: error
           retention-days: 14

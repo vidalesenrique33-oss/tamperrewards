@@ -10,6 +10,7 @@ ext {
     coreSplashScreenVersion = '1.2.0'
     androidxWebkitVersion = '1.14.0'
     rgcfaIncludeGoogle = true
+    playServicesAuthVersion = '20.7.0'
     androidxCredentialsVersion = '1.6.0'
     androidxCredentialsPlayServicesAuthVersion = '1.6.0'
     junitVersion = '4.13.2'

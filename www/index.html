@@ -4862,11 +4862,8 @@ Alpine.data('app',()=>({
       const code=String(e?.code||'').replace(/^auth\//,'');
       const detail=`${code} ${raw}`.trim();
       if(/cancel|canceled|cancelled|user.*closed/i.test(detail))return;
-      const setup=/default FirebaseApp|google-services|developer console|developer_error|10:|12500|28444/i.test(detail);
       const errorLabel=(code||raw||'error desconocido').slice(0,210);
-      const message=setup
-        ?`Configuración de Google incompleta${code?` (${code})`:''}`
-        :`Google: ${errorLabel}`;
+      const message=`Google: ${errorLabel}`;
       try{localStorage.setItem('tamper:lastGoogleAuthError',JSON.stringify({code,raw,primary:e?.primaryError||'',fallback:e?.fallbackError||'',build:window.__TAMPER_BUILD__||'',at:new Date().toISOString()}));}catch(_){}
       this.toast2(message,'❌');
     }

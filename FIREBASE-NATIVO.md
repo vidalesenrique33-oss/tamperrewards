@@ -39,9 +39,11 @@ accidentalmente a otro repositorio; por eso el primer comando usa `-f`.
 ## Estado de la integración
 
 Google Sign-In nativo ya está conectado con la sesión web existente de Firebase,
-por lo que conserva el mismo UID, perfil, XP, niveles y recompensas. Solo falta
-agregar los archivos oficiales y registrar las firmas. Las notificaciones push,
-APNs y la apertura directa de promociones siguen pendientes.
+por lo que conserva el mismo UID, perfil, XP, niveles y recompensas. Android usa
+un puente propio que solicita únicamente el ID token necesario; no solicita un
+access token ni un server auth code que Tamper Rewards no utiliza. Las
+notificaciones push, APNs y la apertura directa de promociones siguen
+pendientes.
 
 No publiques ni compartas las llaves privadas de firma, certificados APNs ni
 archivos de cuentas de servicio. Los archivos de configuración de cliente sí

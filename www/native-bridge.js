@@ -1,7 +1,7 @@
 (function(){
   const cap=window.Capacitor;
   const native=!!(cap&&typeof cap.isNativePlatform==='function'&&cap.isNativePlatform());
-  window.__TAMPER_BUILD__='1.0.3-direct-native-bridge';
+  window.__TAMPER_BUILD__='1.0.4-google-oauth-diagnostics';
   window.__TAMPER_NATIVE__=native;
   window.TamperNative={
     active:native,
@@ -69,34 +69,46 @@
   };
   window.TamperNative.loginGoogle=async function(){
     let result;
+    let credentialManagerError=null;
     try{
-      // En Android usamos primero el selector clásico. Credential Manager
-      // puede devolver NoCredentialException en algunos dispositivos antes
-      // de presentar cualquier cuenta.
+      // Credential Manager es el flujo actual recomendado por Android y no
+      // necesita solicitar un access token legado para completar el acceso.
       result=await callNative('FirebaseAuthentication','signInWithGoogle',{
         skipNativeAuth:true,
-        useCredentialManager:false,
+        useCredentialManager:true,
       });
     }catch(primaryError){
-      const primaryMessage=String(primaryError?.message||primaryError||'');
+      credentialManagerError=primaryError;
+      const primaryMessage=String(primaryError?.message||primaryError||'Error desconocido');
       const primaryCode=String(primaryError?.code||'');
-      if(/cancel|canceled|cancelled|user.*closed/i.test(`${primaryCode} ${primaryMessage}`))throw primaryError;
+      const primaryDetail=`${primaryCode} ${primaryMessage}`.trim();
+      if(/cancel|canceled|cancelled|user.*closed/i.test(primaryDetail))throw primaryError;
+
+      // Algunos equipos no tienen una credencial disponible para Credential
+      // Manager. En ese caso intentamos el selector clásico de Google.
       try{
         result=await callNative('FirebaseAuthentication','signInWithGoogle',{
           skipNativeAuth:true,
-          useCredentialManager:true,
+          useCredentialManager:false,
         });
       }catch(fallbackError){
         const fallbackMessage=String(fallbackError?.message||fallbackError||'Error desconocido');
-        const fallbackCode=String(fallbackError?.code||primaryCode||'GOOGLE_SIGN_IN_FAILED');
-        const error=new Error(fallbackMessage);
-        error.code=fallbackCode;
-        error.primaryError=`${primaryCode} ${primaryMessage}`.trim();
+        const fallbackCode=String(fallbackError?.code||'');
+        const fallbackDetail=`${fallbackCode} ${fallbackMessage}`.trim();
+        const error=new Error(`Credential Manager: ${primaryDetail} | Google clásico: ${fallbackDetail}`);
+        error.code=fallbackCode||primaryCode||'GOOGLE_SIGN_IN_FAILED';
+        error.primaryError=primaryDetail;
+        error.fallbackError=fallbackDetail;
         throw error;
       }
     }
     const idToken=result?.credential?.idToken;
-    if(!idToken)throw new Error('Google no devolvió el token de identidad');
+    if(!idToken){
+      const error=new Error('Google no devolvió el token de identidad');
+      error.code='MISSING_ID_TOKEN';
+      error.primaryError=String(credentialManagerError?.message||'');
+      throw error;
+    }
     return {idToken,accessToken:result?.credential?.accessToken||''};
   };
   window.TamperNative.logoutGoogle=async function(){

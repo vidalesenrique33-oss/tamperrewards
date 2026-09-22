@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "382351819259",
+    "project_id": "tamperpos",
+    "storage_bucket": "tamperpos.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:382351819259:android:c12b6a96efe080d9618b5e",
+        "android_client_info": {
+          "package_name": "com.tamper.rewards"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "382351819259-vmgrqk2okp41mg5iae7qfqdf9prccgjq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tamper.rewards",
+            "certificate_hash": "b2b1d05c06d42719b340a016bafa09e84ef2e8ac"
+          }
+        },
+        {
+          "client_id": "382351819259-n1qon00219a1hofno11pil3fmubdjqcs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDr2dir0ke4t038oAunO0A3L2o8rUXPAc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "382351819259-n1qon00219a1hofno11pil3fmubdjqcs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

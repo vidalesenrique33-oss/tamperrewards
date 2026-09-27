@@ -22,13 +22,13 @@ const nativeBridgeScript=new vm.Script(nativeBridge,{filename:'native-bridge.js'
 assert.equal(pkg.dependencies['@capacitor/core'],'8.5.2');
 assert.equal(pkg.dependencies['@capacitor-firebase/authentication'],'^8.5.2');
 assert.equal(pkg.dependencies['@capacitor/push-notifications'],'^8.1.2');
-assert.equal(pkg.version,'1.0.8');
+assert.equal(pkg.version,'1.0.9');
 assert.deepEqual(cap.plugins.FirebaseAuthentication.providers,['google.com']);
 assert.equal(cap.plugins.FirebaseAuthentication.skipNativeAuth,true);
 assert.match(html,/signInWithCredential/,'Falta enlazar la credencial nativa con Firebase web');
 assert.match(nativeBridge,/callNative\('TamperGoogleAuth','signIn'/,'Falta Google Sign-In nativo directo');
 assert.match(nativeBridge,/registerPlugin\(name\)/,'Los plugins nativos deben registrarse en una app sin bundler');
-assert.match(nativeBridge,/1\.0\.8-halloween-character-detail/,'Falta la marca verificable de esta compilación');
+assert.match(nativeBridge,/1\.0\.9-permanent-any-drink-reward/,'Falta la marca verificable de esta compilación');
 assert.match(html,/hc-detail-overlay/,'Falta el modal de detalle de personajes Halloween');
 assert.match(html,/openHalloweenDetail\(current\.character,current\.unlock\)/,'El botón CONOCER A no abre directamente el personaje desbloqueado');
 assert.match(nativeBridge,/getNativePlugin\('PushNotifications'\)/,'Falta registrar el receptor nativo de notificaciones');
@@ -42,7 +42,7 @@ assert.match(mainActivity,/registerPlugin\(TamperGoogleAuthPlugin\.class\)/,'Mai
 assert.match(tamperGooglePlugin,/requestIdToken\(webClientId\)/,'El puente debe solicitar el ID token');
 assert.doesNotMatch(tamperGooglePlugin,/requestServerAuthCode|GoogleAuthUtil\.getToken/,'El puente no debe pedir credenciales que Tamper no usa');
 const androidBuild=read('android/app/build.gradle');
-assert.match(androidBuild,/versionCode\s+9/,'Android debe generar una actualización distinguible');
+assert.match(androidBuild,/versionCode\s+10/,'Android debe generar una actualización distinguible');
 assert.match(androidBuild,/rootProject\.file\(['"]tamper-debug\.keystore['"]\)/,'Gradle debe usar la llave estable explícita');
 assert.match(androidBuild,/debug\s*\{[\s\S]*signingConfig\s+signingConfigs\.tamperDebug/,'La compilación debug debe fijar su firma');
 assert.match(read('android/app/build.gradle'),/play-services-auth/,'La app debe compilar el selector de cuentas de Google');

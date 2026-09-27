@@ -1,7 +1,7 @@
 (function(){
   const cap=window.Capacitor;
   const native=!!(cap&&typeof cap.isNativePlatform==='function'&&cap.isNativePlatform());
-  window.__TAMPER_BUILD__='1.0.8-halloween-character-detail';
+  window.__TAMPER_BUILD__='1.0.9-permanent-any-drink-reward';
   window.__TAMPER_NATIVE__=native;
   window.TamperNative={
     active:native,

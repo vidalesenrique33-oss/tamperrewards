@@ -3306,7 +3306,7 @@ window.setTamperIcon = function(url){
       <p class="hc-title" style="font-size:1.5rem;">COLLECTION COMPLETE</p>
       <p style="font-size:.76rem;font-weight:800;margin-top:.25rem;">Encontraste a todos.</p>
       <p style="font-size:.62rem;color:#E9A263;font-weight:900;letter-spacing:.1em;margin-top:.6rem;">PREMIO DESBLOQUEADO</p>
-      <p style="font-size:.85rem;font-weight:900;margin-top:.2rem;" x-text="halloweenCampaign?.completionReward?.name||'BEBIDA GRATIS HASTA $85'"></p>
+      <p style="font-size:.85rem;font-weight:900;margin-top:.2rem;" x-text="halloweenCompletionRewardName()"></p>
     </div>
   </div>
 
@@ -3319,9 +3319,10 @@ window.setTamperIcon = function(url){
         <div style="display:flex;align-items:center;gap:.8rem;background:linear-gradient(135deg,var(--acl),var(--card));border:1.5px solid var(--acc);border-radius:var(--rl);padding:.875rem 1rem;box-shadow:var(--s2);">
           <div style="width:46px;height:46px;border-radius:50%;background:var(--acg);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;box-shadow:0 4px 12px rgba(106,123,103,.4);" x-text="g.icon||'🎁'"></div>
           <div style="flex:1;min-width:0;">
-            <p style="font-weight:800;font-size:.9rem;color:var(--text);" x-text="g.name"></p>
+            <p style="font-weight:800;font-size:.9rem;color:var(--text);" x-text="giftDisplayName(g)"></p>
             <p style="font-size:10px;color:var(--acc);font-weight:800;margin-top:.15rem;"><i class="fa-solid fa-gift" style="font-size:8px;"></i> Regalo de <span x-text="g.cafeName||'una cafetería'"></span><span x-show="g.isBirthday"> · 🎂</span></p>
-            <p style="font-size:9.5px;color:var(--muted);font-weight:700;margin-top:.2rem;"><i class="fa-regular fa-clock" style="font-size:8px;"></i> Expira en <span x-text="giftHoursLeft(g)"></span>h</p>
+            <p x-show="g.campaignReward||g.noExpiration" style="font-size:9.5px;color:var(--acc);font-weight:800;margin-top:.2rem;"><i class="fa-solid fa-infinity" style="font-size:8px;"></i> Sin fecha de vencimiento</p>
+            <p x-show="!g.campaignReward&&!g.noExpiration" style="font-size:9.5px;color:var(--muted);font-weight:700;margin-top:.2rem;"><i class="fa-regular fa-clock" style="font-size:8px;"></i> Expira en <span x-text="giftHoursLeft(g)"></span>h</p>
           </div>
           <button @click="openGift(g)" class="btn btn-d btn-sm" style="flex-shrink:0;">Canjear</button>
         </div>
@@ -4190,9 +4191,9 @@ window.setTamperIcon = function(url){
     </div>
     <div x-show="sRd.isGift" style="background:var(--acl);border-radius:.875rem;padding:.7rem;margin-bottom:.875rem;display:flex;align-items:flex-start;gap:.5rem;text-align:left;">
       <i class="fa-solid fa-gift" style="color:var(--acc);font-size:.85rem;margin-top:.1rem;"></i>
-      <span style="font-size:10.5px;font-weight:600;color:var(--sub);line-height:1.4;">Regalo gratis de <strong x-text="sRd.cafeName||'una cafetería'"></strong>. No descuenta puntos ni cashback. ¡Disfrútalo! 🎉</span>
+      <span style="font-size:10.5px;font-weight:600;color:var(--sub);line-height:1.4;"><strong x-text="sRd.campaignReward?'Cualquier bebida gratis':'Regalo gratis'"></strong> de <strong x-text="sRd.cafeName||'una cafetería'"></strong>. No descuenta puntos ni cashback. El premio permanece disponible hasta que sea canjeado. 🎉</span>
     </div>
-    <div style="background:rgba(220,38,38,.08);border-radius:.875rem;padding:.72rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem;"><i class="fa-regular fa-clock" style="color:var(--red);font-size:.78rem;"></i><span style="font-size:12px;font-weight:800;color:var(--red);">Expira en <span x-text="frt"></span></span></div>
+    <div style="background:rgba(220,38,38,.08);border-radius:.875rem;padding:.72rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:center;gap:.5rem;"><i class="fa-regular fa-clock" style="color:var(--red);font-size:.78rem;"></i><span style="font-size:12px;font-weight:800;color:var(--red);">Este QR se actualiza en <span x-text="frt"></span></span></div>
     <button @click="canRd()" class="btn btn-g">Cancelar</button>
   </div>
 </div>
@@ -4652,6 +4653,7 @@ Alpine.data('app',()=>({
   get halloweenRequired(){return this.halloweenCharacters.filter(c=>c.active!==false&&c.requiredForCompletion!==false);},
   get halloweenFoundRequired(){const ids=new Set(this.halloweenUnlocks.filter(u=>u.campaignId===(this.halloweenCampaign?.campaignId||this.halloweenCampaign?.id)).map(u=>u.characterId));return this.halloweenRequired.filter(c=>ids.has(c.characterId||c.id)).length;},
   get halloweenProgressPercent(){return this.halloweenRequired.length?Math.min(100,(this.halloweenFoundRequired/this.halloweenRequired.length)*100):0;},
+  halloweenCompletionRewardName(){const reward=this.halloweenCampaign?.completionReward||{};return (reward.rewardType||'any_drink')==='any_drink'?'CUALQUIER BEBIDA GRATIS':(reward.name||'BEBIDA GRATIS');},
   halloweenUnlockFor(character){const id=String(character?.characterId||character?.id||'').trim().toLowerCase(),campaignId=String(this.halloweenCampaign?.campaignId||this.halloweenCampaign?.id||'').trim();return this.halloweenUnlocks.find(u=>String(u.campaignId||'').trim()===campaignId&&String(u.characterId||'').trim().toLowerCase()===id)||null;},
   halloweenFoundDate(unlock){const ts=unlock?.unlockedAt?.toMillis?unlock.unlockedAt.toMillis():Number(unlock?.unlockedAt||0);return ts?new Intl.DateTimeFormat('es-MX',{day:'2-digit',month:'short'}).format(new Date(ts)).replace('.','').toUpperCase():'';},
   openHalloweenDetail(character,knownUnlock=null){const unlock=knownUnlock||this.halloweenUnlockFor(character);if(!unlock)return;this.halloweenDetail={character:{...character},unlock:{...unlock}};this.feel('tap','light');this.$nextTick(()=>{if(this.$refs.halloweenDetailCard)this.$refs.halloweenDetailCard.scrollTop=0;});},
@@ -4830,7 +4832,7 @@ Alpine.data('app',()=>({
       onSnapshot(collection(db,'tamper_clients',u.uid,'gifts'),snap=>{
         const list=snap.docs.map(d=>({id:d.id,...d.data()}))
           .filter(g=>!g.redeemed&&!g.isRedeemed)
-          .filter(g=>{const exp=g.expiresAt?.toMillis?g.expiresAt.toMillis():Number(g.expiresAt||0);return exp?exp>Date.now():(Date.now()-(g.createdAt||0))<24*60*60*1000;})
+          .filter(g=>{if(g.campaignReward||g.noExpiration)return true;const exp=g.expiresAt?.toMillis?g.expiresAt.toMillis():Number(g.expiresAt||0);return exp?exp>Date.now():(Date.now()-(g.createdAt||0))<24*60*60*1000;})
           .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
         // Si el QR de un regalo está abierto y desaparece de la lista → fue canjeado
         if(this.mRd&&this.sRd&&this.sRd.isGift&&!list.find(g=>g.id===this.sRd.id)){ this.onRedeemConfirmed(); }
@@ -6286,11 +6288,12 @@ Alpine.data('app',()=>({
     }catch(e){ this.toast2('No se pudo guardar','❌'); }
   },
   skipBirth(){ localStorage.setItem('t_birth_skip','1'); this.askBirth=false; },
+  giftDisplayName(g){return g?.campaignReward?'Cualquier bebida gratis':(g?.name||'Regalo');},
   openGift(g){
     const exp=g.expiresAt?.toMillis?g.expiresAt.toMillis():Number(g.expiresAt||0);
-    if((exp&&Date.now()>=exp)||(!exp&&(Date.now()-(g.createdAt||0))>=24*60*60*1000)){ this.toast2('Este regalo ya expiró','⏰'); return; }
+    if(!g.campaignReward&&!g.noExpiration&&((exp&&Date.now()>=exp)||(!exp&&(Date.now()-(g.createdAt||0))>=24*60*60*1000))){ this.toast2('Este regalo ya expiró','⏰'); return; }
     this.feel('coin','med');
-    this.sRd={...g,isGift:true,name:g.name,icon:g.icon||'🎁'};
+    this.sRd={...g,isGift:true,name:this.giftDisplayName(g),icon:g.icon||'🎁'};
     this.mRd=true;this.rtl=300;
     if(this.rint)clearInterval(this.rint);
     this.rint=setInterval(()=>{this.rtl--;if(this.rtl<=0)this.canRd();},1000);
@@ -6536,7 +6539,7 @@ Alpine.data('app',()=>({
       const deviceId=await this.pushDeviceId(token);
       const device={
         token,tokenType:'fcm',platform:registration?.platform||'android',enabled:true,
-        appVersion:'1.0.8',build:window.__TAMPER_BUILD__||'',updatedAt:serverTimestamp(),
+        appVersion:'1.0.9',build:window.__TAMPER_BUILD__||'',updatedAt:serverTimestamp(),
         preferences:{pickgo:true,promotions:true,visitReminders:true,automatic:true},
       };
       // El documento principal ya es editable por el propio cliente en la
@@ -6544,7 +6547,7 @@ Alpine.data('app',()=>({
       // dependa de que las reglas permitan todavía la subcolección devices.
       await setDoc(doc(db,'tamper_clients',uid),{
         pushEnabled:true,pushToken:token,pushPlatform:device.platform,
-        pushAppVersion:'1.0.8',pushPreferences:device.preferences,
+        pushAppVersion:'1.0.9',pushPreferences:device.preferences,
         pushUpdatedAt:serverTimestamp(),
       },{merge:true});
       try{

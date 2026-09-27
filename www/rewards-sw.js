@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'tamper-rewards-v3-2026-09-21-seasonal-maps';
+const CACHE_VERSION = 'tamper-rewards-v4-2026-09-26-halloween-collection';
 const STATIC_CACHE = `${CACHE_VERSION}-static`;
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const OFFLINE_URL = './index.html';

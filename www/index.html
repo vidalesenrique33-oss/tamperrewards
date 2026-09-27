@@ -1742,18 +1742,22 @@ img.image-fallback-applied{object-fit:cover!important;filter:saturate(.9)}
 .managed-theme-card{display:flex;align-items:center;gap:.8rem;padding:.9rem;background:var(--bg2);border:1px solid var(--bdr);border-radius:var(--rl)}
 .managed-theme-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:15px;background:var(--card);border:1px solid var(--bdr);font-size:1.4rem;box-shadow:var(--s1)}
 @media(prefers-reduced-motion:reduce){.seasonal-ornament{animation:none!important}}
+.hc-wrap{position:relative;margin:0 -.15rem 1.4rem;padding:1rem;border-radius:1.6rem;overflow:hidden;background:linear-gradient(145deg,#1C221C,#2B211A);color:#FFF3DD;border:1px solid #A95025;box-shadow:0 20px 48px rgba(35,24,17,.24)}
+.hc-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.16;background-image:radial-gradient(#FFF3DD .6px,transparent .6px);background-size:8px 8px;mix-blend-mode:soft-light}.hc-head,.hc-grid{position:relative;z-index:1}.hc-title{font-family:'Creepster','Coiny',system-ui;font-size:1.72rem;letter-spacing:.045em;color:#E9A263;line-height:1.05}.hc-progress{height:8px;border-radius:99px;background:rgba(255,255,255,.11);overflow:hidden;margin:.65rem 0}.hc-progress>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#A95025,#E9A263);transition:width .5s ease}.hc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.72rem;margin-top:1rem}.hc-card{position:relative;min-height:218px;border-radius:1.25rem;overflow:hidden;border:1px solid rgba(255,243,221,.16);background:#30251D;box-shadow:0 12px 24px rgba(0,0,0,.18);text-align:left;color:#FFF3DD;padding:0;cursor:pointer}.hc-card-img{height:154px;overflow:hidden;background:linear-gradient(145deg,#2C332A,#4A3426)}.hc-card-img img{width:100%;height:100%;object-fit:cover;transition:filter .35s ease,transform .35s ease}.hc-card.locked .hc-card-img img{filter:blur(13px) brightness(.32) saturate(.5);transform:scale(1.12)}.hc-card.inactive{opacity:.48}.hc-card-copy{padding:.72rem}.hc-card-name{font-family:'Creepster','Coiny',system-ui;font-size:1.13rem;letter-spacing:.035em}.hc-card-state{font-size:.58rem;font-weight:900;letter-spacing:.1em;margin-top:.18rem;color:#D4C5AF}.hc-soldout{position:absolute;right:.55rem;top:.55rem;background:#87261F;color:#FFF3DD;border:1px solid rgba(255,255,255,.2);padding:.27rem .45rem;border-radius:999px;font-family:'Creepster','Coiny',system-ui;font-size:.7rem;letter-spacing:.05em}.hc-lock{position:absolute;left:.55rem;top:.55rem;width:29px;height:29px;display:grid;place-items:center;background:rgba(20,15,12,.8);border-radius:50%;font-size:.75rem}.hc-complete{position:relative;z-index:1;margin-top:1rem;padding:1rem;border:1px solid rgba(233,162,99,.5);border-radius:1.2rem;background:rgba(169,80,37,.16);text-align:center}.hc-detail-image{width:100%;max-height:360px;object-fit:cover;border-radius:1.4rem;background:#2B211A}.hc-unlock{position:fixed;inset:0;z-index:9000;background:#100D0B;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.2rem;color:#FFF3DD;overflow:hidden}.hc-unlock::before{content:'';position:absolute;inset:-20%;background:radial-gradient(circle,rgba(201,98,40,.38),transparent 36%),radial-gradient(rgba(255,243,221,.18) .7px,transparent .8px);background-size:auto,7px 7px;animation:hcSmoke 2.6s ease-out both}.hc-unlock-image{position:relative;width:min(72vw,330px);height:min(72vw,330px);object-fit:cover;border-radius:2rem;filter:blur(18px) brightness(.25);animation:hcReveal 2.2s .25s cubic-bezier(.2,.8,.2,1) forwards;box-shadow:0 0 0 1px rgba(233,162,99,.45),0 30px 80px rgba(0,0,0,.55)}.hc-unlock-copy{position:relative;text-align:center;margin-top:1rem;animation:hcCopy .7s 1.5s both}.hc-unlock-copy h2{font-family:'Creepster','Coiny',system-ui;font-size:2.35rem;color:#E9A263;letter-spacing:.06em}@keyframes hcReveal{0%{filter:blur(18px) brightness(.2);transform:scale(.84);opacity:.15}65%{filter:blur(2px) brightness(.9);transform:scale(1.04);opacity:1}100%{filter:none;transform:scale(1);opacity:1}}@keyframes hcSmoke{0%{opacity:0;transform:scale(.8) rotate(0)}50%{opacity:1}100%{opacity:.38;transform:scale(1.2) rotate(6deg)}}@keyframes hcCopy{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media(min-width:620px){.hc-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.hc-unlock::before,.hc-unlock-image,.hc-unlock-copy{animation:none!important}.hc-unlock-image{filter:none;opacity:1}}
 </style>
 
 <!-- Firebase -->
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 import{getAuth,onAuthStateChanged,signInWithPopup,signInWithCredential,GoogleAuthProvider,signOut,setPersistence,browserLocalPersistence}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
-import{getFirestore,collection,doc,setDoc,getDoc,getDocs,onSnapshot,updateDoc,addDoc,serverTimestamp,increment}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+import{getFirestore,collection,doc,setDoc,getDoc,getDocs,onSnapshot,updateDoc,addDoc,serverTimestamp,increment,query,where}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 import{getStorage,ref,uploadBytes,getDownloadURL}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-storage.js";
+import{getFunctions,httpsCallable}from"https://www.gstatic.com/firebasejs/11.0.0/firebase-functions.js";
 const f=initializeApp({apiKey:"AIzaSyBAb8cNrqSr-ZJmNoLmejFwa4tf_xTUjBk",authDomain:"tamperpos.firebaseapp.com",projectId:"tamperpos",storageBucket:"tamperpos.firebasestorage.app",messagingSenderId:"382351819259",appId:"1:382351819259:web:ebbd8782d1bea040618b5e"});
 const _auth=getAuth(f);
 setPersistence(_auth,browserLocalPersistence).catch(()=>{});
-window.__tf={auth:_auth,db:getFirestore(f),st:getStorage(f),GoogleAuthProvider,signInWithPopup,signInWithCredential,signOut,onAuthStateChanged,collection,doc,setDoc,getDoc,getDocs,onSnapshot,updateDoc,addDoc,serverTimestamp,ref,uploadBytes,getDownloadURL,increment};
+window.__tf={auth:_auth,db:getFirestore(f),st:getStorage(f),functions:getFunctions(f,'us-central1'),GoogleAuthProvider,signInWithPopup,signInWithCredential,signOut,onAuthStateChanged,collection,doc,setDoc,getDoc,getDocs,onSnapshot,updateDoc,addDoc,serverTimestamp,ref,uploadBytes,getDownloadURL,increment,query,where,httpsCallable};
 window.dispatchEvent(new Event('tf-ready'));
 </script>
 <!-- PWA: el manifest es un archivo real para que Android, iOS y Netlify
@@ -3265,10 +3269,46 @@ window.setTamperIcon = function(url){
     <div class="title-underline"></div>
   </div>
 
+  <!-- RATIO HALLOWEEN COLLECTION · catálogo real desde Contabilidad -->
+  <div class="hc-wrap" x-show="halloweenVisible">
+    <div class="hc-head">
+      <p class="hc-title">RATIO HALLOWEEN COLLECTION</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:.7rem;margin-top:.5rem;">
+        <p style="font-size:.72rem;font-weight:900;letter-spacing:.08em;"><span x-text="halloweenFoundRequired"></span> / <span x-text="halloweenRequired.length"></span> ENCONTRADOS</p>
+        <span style="font-size:.58rem;color:#D4C5AF;" x-text="halloweenCampaign?.cafeName||'Ratio Coffee'"></span>
+      </div>
+      <div class="hc-progress"><span :style="'width:'+halloweenProgressPercent+'%'"></span></div>
+      <p style="font-size:.66rem;color:#D4C5AF;line-height:1.45;">Completa la colección y desbloquea una bebida gratis.</p>
+    </div>
+    <div class="hc-grid">
+      <template x-for="character in halloweenCharacters" :key="character.characterId||character.id">
+        <button class="hc-card" :class="{'locked':!halloweenUnlockFor(character),'inactive':character.active===false}" @click="openHalloweenDetail(character)" :disabled="character.active===false">
+          <div class="hc-card-img">
+            <img :src="character.imageUrl||''" :alt="halloweenUnlockFor(character)?character.name:'Personaje oculto'" x-show="character.imageUrl">
+            <div x-show="!character.imageUrl" style="height:100%;display:grid;place-items:center;font-size:2.5rem;">🎃</div>
+          </div>
+          <span class="hc-lock" x-show="!halloweenUnlockFor(character)"><i class="fa-solid fa-lock"></i></span>
+          <span class="hc-soldout" x-show="Number(character.stockAvailable||0)<=0">AGOTADA</span>
+          <div class="hc-card-copy">
+            <p class="hc-card-name" x-text="halloweenUnlockFor(character)?character.name:'???'"></p>
+            <p class="hc-card-state" x-show="!halloweenUnlockFor(character)" x-text="Number(character.stockAvailable||0)<=0?'NO ENCONTRADO':'NO ENCONTRADO'"></p>
+            <p class="hc-card-state" x-show="halloweenUnlockFor(character)">ENCONTRADO · <span x-text="halloweenFoundDate(halloweenUnlockFor(character))"></span></p>
+          </div>
+        </button>
+      </template>
+    </div>
+    <div class="hc-complete" x-show="halloweenProgress?.completed===true">
+      <p class="hc-title" style="font-size:1.5rem;">COLLECTION COMPLETE</p>
+      <p style="font-size:.76rem;font-weight:800;margin-top:.25rem;">Encontraste a todos.</p>
+      <p style="font-size:.62rem;color:#E9A263;font-weight:900;letter-spacing:.1em;margin-top:.6rem;">PREMIO DESBLOQUEADO</p>
+      <p style="font-size:.85rem;font-weight:900;margin-top:.2rem;" x-text="halloweenCampaign?.completionReward?.name||'BEBIDA GRATIS HASTA $85'"></p>
+    </div>
+  </div>
+
   <!-- 🎁 REGALOS RECIBIDOS -->
   <div x-show="gifts.length>0" style="margin-bottom:1.25rem;">
     <div class="sh2" style="padding:0;margin-bottom:.6rem;"><h3>Tus regalos 🎁</h3></div>
-    <p style="font-size:9.5px;color:var(--muted);font-weight:600;line-height:1.5;margin:-.3rem 0 .6rem;opacity:.8;"><i class="fa-solid fa-circle-info" style="font-size:8px;"></i> Cada regalo expira 24 horas después de ser enviado · Personal, no transferible</p>
+    <p style="font-size:9.5px;color:var(--muted);font-weight:600;line-height:1.5;margin:-.3rem 0 .6rem;opacity:.8;"><i class="fa-solid fa-circle-info" style="font-size:8px;"></i> Consulta la vigencia mostrada en cada regalo · Personal, no transferible</p>
     <div style="display:flex;flex-direction:column;gap:.6rem;">
       <template x-for="g in gifts" :key="g.id">
         <div style="display:flex;align-items:center;gap:.8rem;background:linear-gradient(135deg,var(--acl),var(--card));border:1.5px solid var(--acc);border-radius:var(--rl);padding:.875rem 1rem;box-shadow:var(--s2);">
@@ -3506,13 +3546,48 @@ window.setTamperIcon = function(url){
   <button class="ni" :class="['home','streak','pickgo','tracking'].includes(sc)?'on':''" @click="go('home')" aria-label="Inicio"><i class="fa-solid fa-house"></i><span class="nl">Inicio</span></button>
   <button class="ni" :class="sc==='cafes'?'on':''" @click="go('cafes')" aria-label="Cafeterías"><i class="fa-solid fa-location-dot"></i><span class="nl">Cafés</span></button>
   <button class="ni qr-tab" @click="openQR()" aria-label="Mostrar mi código QR"><i class="fa-solid fa-qrcode"></i><span class="nl">Mi QR</span></button>
-  <button class="ni" :class="sc==='rewards'?'on':''" @click="go('rewards')" aria-label="Premios"><i class="fa-solid fa-gift"></i><span class="nl">Premios</span></button>
+  <button class="ni" :class="sc==='rewards'?'on':''" @click="go('rewards')" aria-label="Premios"><span x-show="halloweenVisible" style="font-size:1.22rem;line-height:1;">🎃</span><i x-show="!halloweenVisible" class="fa-solid fa-gift"></i><span class="nl">Premios</span></button>
   <button class="ni" :class="['profile','achievements','history','settings'].includes(sc)?'on':''" @click="go('profile')" aria-label="Mi perfil"><i class="fa-solid fa-user"></i><span class="nl">Perfil</span></button>
 </nav>
 </div>
 </template>
 
 <!-- ═════════ MODALS ═════════ -->
+
+<!-- Detalle premium del personaje encontrado -->
+<template x-if="halloweenDetail">
+  <div class="mo" style="display:flex;z-index:8200;background:rgba(16,13,11,.76);backdrop-filter:blur(12px);" @click.self="halloweenDetail=null">
+    <div class="ms" style="background:#F3E5CB;max-width:520px;color:#241A14;border:1px solid #A95025;max-height:92vh;overflow:auto;">
+      <button class="mx" @click="halloweenDetail=null"><i class="fa-solid fa-xmark"></i></button>
+      <img class="hc-detail-image" :src="halloweenDetail.character.imageUrl||''" :alt="halloweenDetail.character.name">
+      <div style="padding:1rem .25rem .25rem;">
+        <h2 class="hc-title" style="font-size:2.4rem;color:#A95025;" x-text="halloweenDetail.character.name"></h2>
+        <p style="font-size:.84rem;font-weight:800;color:#5D4A3D;" x-text="halloweenDetail.character.subtitle"></p>
+        <p style="font-size:.62rem;font-weight:900;letter-spacing:.1em;color:#355C45;margin-top:.55rem;">ENCONTRADO · <span x-text="halloweenFoundDate(halloweenDetail.unlock)"></span></p>
+        <p style="font-size:.82rem;line-height:1.7;color:#493A30;margin-top:1rem;" x-text="halloweenDetail.character.description"></p>
+        <div style="margin-top:1rem;padding:1rem;border-radius:1rem;background:#DDD0B8;border:1px solid #C8B393;">
+          <p class="hc-title" style="font-size:1rem;color:#A95025;">PISTA</p>
+          <p style="font-size:.76rem;line-height:1.55;color:#493A30;margin-top:.3rem;font-style:italic;" x-text="halloweenDetail.character.hint"></p>
+        </div>
+        <p style="font-size:.62rem;font-weight:900;color:#87261F;margin-top:.9rem;" x-show="Number(halloweenDetail.character.stockAvailable||0)<=0">AGOTADA · Tu personaje permanece en la colección.</p>
+      </div>
+    </div>
+  </div>
+</template>
+
+<!-- Animación de desbloqueo: se confirma como vista sólo después de mostrarse -->
+<template x-if="halloweenUnlockAnimation">
+  <div class="hc-unlock">
+    <p style="position:relative;font-size:.62rem;font-weight:900;letter-spacing:.16em;color:#D4C5AF;margin-bottom:.8rem;">NUEVO PERSONAJE ENCONTRADO</p>
+    <img class="hc-unlock-image" :src="halloweenUnlockAnimation.character.imageUrl||''" :alt="halloweenUnlockAnimation.character.name">
+    <div class="hc-unlock-copy">
+      <h2 x-text="halloweenUnlockAnimation.character.name"></h2>
+      <p style="font-size:.74rem;font-weight:800;margin-top:.15rem;"><span x-text="halloweenFoundRequired"></span> / <span x-text="halloweenRequired.length"></span></p>
+      <button @click="finishHalloweenAnimation(true)" style="margin-top:1rem;padding:.85rem 1.2rem;border-radius:999px;border:1px solid #E9A263;background:#A95025;color:#fff;font-size:.66rem;font-weight:900;letter-spacing:.08em;">CONOCER A <span x-text="(halloweenUnlockAnimation.character.name||'PERSONAJE').toUpperCase()"></span></button>
+      <button @click="finishHalloweenAnimation(false)" style="display:block;margin:.7rem auto 0;background:none;border:0;color:#BFAF99;font-size:.62rem;font-weight:800;">Cerrar</button>
+    </div>
+  </div>
+</template>
 
 <!-- MASCOT PICKER MODAL -->
 <template x-if="mMascot">
@@ -4222,6 +4297,7 @@ Alpine.data('app',()=>({
   _pushEventsBound:false, _pushUid:'', _pendingPushData:null,
   tut:false, tutStep:0,
   askBirth:false, birthInput:'', gifts:[], chals:[], chalLoading:false,
+  halloweenCampaign:null, halloweenCharacters:[], halloweenUnlocks:[], halloweenProgress:null, halloweenDetail:null, halloweenUnlockAnimation:null, _hcCampaignDocs:{}, _hcCampaignUnsubs:[], _hcCharactersUnsub:null, _hcUnlocksUnsub:null, _hcProgressUnsub:null, _hcCompletionCheckedKey:'',
   fx:{sound:true,haptic:true}, themeSoundEnabled:true, cafesLoading:true, largeText:false, highContrast:false,
   // Weather widget
   wx:{temp:null,feels:null,icon:'🌤',desc:'',city:''},
@@ -4411,6 +4487,7 @@ Alpine.data('app',()=>({
           this.cafesLoading=false;
           this.calcDist();
           if(this.fbUser)this.listenRewards();
+          this.listenHalloweenCollection();
           this.$nextTick(()=>{ if(this.lmap)this.addLMarkers(); 
           this._listenBoosts(this.cafes);
           this._listenEventos(this.cafes);});
@@ -4442,6 +4519,7 @@ Alpine.data('app',()=>({
         this.listenCoupons();
         this.listenSeasonalTheme();
         this.loadLoginImage();
+        this.listenHalloweenCollection();
         // Show welcome-back screen once per session
         if(!sessionStorage.getItem('t_welcomed')){
           this.showWelcome=true;
@@ -4515,6 +4593,81 @@ Alpine.data('app',()=>({
     const def = this.seasonalCatalog[safe];
     this.seasonalDecos = safe==='halloween' ? [] : ((def && def.decoraciones) ? def.decoraciones : []);
     this.$nextTick(()=>this.refreshMapTheme());
+  },
+  listenHalloweenCollection(){
+    if(!window.__tf||!Array.isArray(this.cafes))return;
+    this._hcCampaignUnsubs.forEach(fn=>{try{fn();}catch(e){}});this._hcCampaignUnsubs=[];this._hcCampaignDocs={};
+    const{db,doc,onSnapshot,collection}=window.__tf;
+    this.cafes.forEach(cafe=>{
+      const path=['artifacts',cafe.id,'public','data','seasonalCampaigns','ratio-halloween-2026'];
+      const unsub=onSnapshot(doc(db,...path),snap=>{
+        if(snap.exists())this._hcCampaignDocs[cafe.id]={id:snap.id,businessId:cafe.id,cafeName:cafe.nombre||cafe.name||'Ratio Coffee',...snap.data()};
+        else delete this._hcCampaignDocs[cafe.id];
+        const now=Date.now();
+        const candidates=Object.values(this._hcCampaignDocs).filter(c=>c.type==='halloween_collection'&&c.active===true&&(!c.startAt||c.startAt<=now)&&(!c.endAt||c.endAt>=now));
+        const next=candidates.find(c=>/ratio/i.test(c.cafeName||''))||candidates[0]||null;
+        const changed=(next?.businessId||'')!==(this.halloweenCampaign?.businessId||'');
+        this.halloweenCampaign=next;
+        if(changed){
+          if(this._hcCharactersUnsub){try{this._hcCharactersUnsub();}catch(e){}}
+          this.halloweenCharacters=[];
+          if(next){
+            this._hcCharactersUnsub=onSnapshot(collection(db,'artifacts',next.businessId,'public','data','seasonalCampaigns',next.campaignId||next.id,'characters'),chars=>{
+              this.halloweenCharacters=chars.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(a.order||0)-(b.order||0));
+              this.checkHalloweenUnlockAnimation();
+              this.ensureHalloweenCompletion();
+            },e=>console.warn('Halloween characters:',e));
+          }
+        }
+        this.listenHalloweenUser();
+      },e=>console.warn('Halloween campaign:',e));
+      this._hcCampaignUnsubs.push(unsub);
+    });
+  },
+  listenHalloweenUser(){
+    if(!this.fbUser||!window.__tf)return;
+    const{db,collection,doc,onSnapshot}=window.__tf;
+    if(!this._hcUnlocksUnsub){
+      this._hcUnlocksUnsub=onSnapshot(collection(db,'tamper_clients',this.fbUser.uid,'collectionUnlocks'),snap=>{
+        this.halloweenUnlocks=snap.docs.map(d=>({id:d.id,...d.data()}));
+        this.checkHalloweenUnlockAnimation();
+        this.ensureHalloweenCompletion();
+      },e=>console.warn('Halloween unlocks:',e));
+    }
+    if(this._hcProgressUnsub){try{this._hcProgressUnsub();}catch(e){}}
+    if(this.halloweenCampaign){
+      this._hcProgressUnsub=onSnapshot(doc(db,'tamper_clients',this.fbUser.uid,'collectionProgress',this.halloweenCampaign.campaignId||this.halloweenCampaign.id),snap=>{this.halloweenProgress=snap.exists()?snap.data():null;},()=>{});
+    }
+  },
+  get halloweenVisible(){return !!(this.halloweenCampaign&&this.halloweenCampaign.active);},
+  get halloweenRequired(){return this.halloweenCharacters.filter(c=>c.active!==false&&c.requiredForCompletion!==false);},
+  get halloweenFoundRequired(){const ids=new Set(this.halloweenUnlocks.filter(u=>u.campaignId===(this.halloweenCampaign?.campaignId||this.halloweenCampaign?.id)).map(u=>u.characterId));return this.halloweenRequired.filter(c=>ids.has(c.characterId||c.id)).length;},
+  get halloweenProgressPercent(){return this.halloweenRequired.length?Math.min(100,(this.halloweenFoundRequired/this.halloweenRequired.length)*100):0;},
+  halloweenUnlockFor(character){const id=character?.characterId||character?.id,campaignId=this.halloweenCampaign?.campaignId||this.halloweenCampaign?.id;return this.halloweenUnlocks.find(u=>u.campaignId===campaignId&&u.characterId===id)||null;},
+  halloweenFoundDate(unlock){const ts=unlock?.unlockedAt?.toMillis?unlock.unlockedAt.toMillis():Number(unlock?.unlockedAt||0);return ts?new Intl.DateTimeFormat('es-MX',{day:'2-digit',month:'short'}).format(new Date(ts)).replace('.','').toUpperCase():'';},
+  openHalloweenDetail(character){const unlock=this.halloweenUnlockFor(character);if(!unlock)return;this.halloweenDetail={character,unlock};this.feel('tap','light');},
+  checkHalloweenUnlockAnimation(){
+    if(this.halloweenUnlockAnimation||!this.halloweenCampaign||!this.halloweenCharacters.length)return;
+    const campaignId=this.halloweenCampaign.campaignId||this.halloweenCampaign.id;
+    const pending=this.halloweenUnlocks.filter(u=>u.campaignId===campaignId&&u.animationSeen!==true).sort((a,b)=>(a.unlockedAt||0)-(b.unlockedAt||0))[0];
+    if(!pending)return;
+    const character=this.halloweenCharacters.find(c=>(c.characterId||c.id)===pending.characterId);if(!character)return;
+    this.halloweenUnlockAnimation={character,unlock:pending};this.feel('success','success');
+  },
+  async ensureHalloweenCompletion(){
+    if(!this.fbUser||!this.halloweenCampaign||!this.halloweenRequired.length||this.halloweenFoundRequired!==this.halloweenRequired.length)return;
+    const campaignId=this.halloweenCampaign.campaignId||this.halloweenCampaign.id;
+    const key=`${campaignId}:${this.halloweenFoundRequired}:${this.halloweenRequired.length}`;
+    if(this._hcCompletionCheckedKey===key)return;this._hcCompletionCheckedKey=key;
+    try{const{functions,httpsCallable}=window.__tf;await httpsCallable(functions,'ensureHalloweenCompletion')({businessId:this.halloweenCampaign.businessId,campaignId});}
+    catch(e){this._hcCompletionCheckedKey='';console.warn('Halloween completion:',e);}
+  },
+  async finishHalloweenAnimation(openDetail=false){
+    const current=this.halloweenUnlockAnimation;if(!current)return;
+    try{const{functions,httpsCallable}=window.__tf;await httpsCallable(functions,'markHalloweenUnlockSeen')({campaignId:current.unlock.campaignId,characterId:current.unlock.characterId});current.unlock.animationSeen=true;}catch(e){console.warn('Halloween animation seen:',e);return this.toast2('Necesitamos conexión para confirmar el desbloqueo','⚠️');}
+    this.halloweenUnlockAnimation=null;
+    if(openDetail)this.openHalloweenDetail(current.character);
+    setTimeout(()=>this.checkHalloweenUnlockAnimation(),250);
   },
   listenCoupons(){
     const{db,collection,onSnapshot}=window.__tf;
@@ -4667,7 +4820,7 @@ Alpine.data('app',()=>({
       onSnapshot(collection(db,'tamper_clients',u.uid,'gifts'),snap=>{
         const list=snap.docs.map(d=>({id:d.id,...d.data()}))
           .filter(g=>!g.redeemed&&!g.isRedeemed)
-          .filter(g=>(Date.now()-(g.createdAt||0))<24*60*60*1000) // expira a las 24h
+          .filter(g=>{const exp=g.expiresAt?.toMillis?g.expiresAt.toMillis():Number(g.expiresAt||0);return exp?exp>Date.now():(Date.now()-(g.createdAt||0))<24*60*60*1000;})
           .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
         // Si el QR de un regalo está abierto y desaparece de la lista → fue canjeado
         if(this.mRd&&this.sRd&&this.sRd.isGift&&!list.find(g=>g.id===this.sRd.id)){ this.onRedeemConfirmed(); }
@@ -6124,7 +6277,8 @@ Alpine.data('app',()=>({
   },
   skipBirth(){ localStorage.setItem('t_birth_skip','1'); this.askBirth=false; },
   openGift(g){
-    if((Date.now()-(g.createdAt||0))>=24*60*60*1000){ this.toast2('Este regalo ya expiró','⏰'); return; }
+    const exp=g.expiresAt?.toMillis?g.expiresAt.toMillis():Number(g.expiresAt||0);
+    if((exp&&Date.now()>=exp)||(!exp&&(Date.now()-(g.createdAt||0))>=24*60*60*1000)){ this.toast2('Este regalo ya expiró','⏰'); return; }
     this.feel('coin','med');
     this.sRd={...g,isGift:true,name:g.name,icon:g.icon||'🎁'};
     this.mRd=true;this.rtl=300;
@@ -6134,7 +6288,8 @@ Alpine.data('app',()=>({
     this.$nextTick(()=>{const el=document.getElementById('rqr');if(el){el.innerHTML='';new QRCode(el,{text:code,width:196,height:196,colorDark:'#000',colorLight:'#fff',correctLevel:QRCode.CorrectLevel.H});}});
   },
   giftHoursLeft(g){
-    const msLeft=24*60*60*1000-(Date.now()-(g.createdAt||0));
+    const exp=g.expiresAt?.toMillis?g.expiresAt.toMillis():Number(g.expiresAt||0);
+    const msLeft=exp?exp-Date.now():24*60*60*1000-(Date.now()-(g.createdAt||0));
     return Math.max(0,Math.ceil(msLeft/(60*60*1000)));
   },
 

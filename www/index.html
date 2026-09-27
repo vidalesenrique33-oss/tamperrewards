@@ -1744,6 +1744,11 @@ img.image-fallback-applied{object-fit:cover!important;filter:saturate(.9)}
 @media(prefers-reduced-motion:reduce){.seasonal-ornament{animation:none!important}}
 .hc-wrap{position:relative;margin:0 -.15rem 1.4rem;padding:1rem;border-radius:1.6rem;overflow:hidden;background:linear-gradient(145deg,#1C221C,#2B211A);color:#FFF3DD;border:1px solid #A95025;box-shadow:0 20px 48px rgba(35,24,17,.24)}
 .hc-wrap::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.16;background-image:radial-gradient(#FFF3DD .6px,transparent .6px);background-size:8px 8px;mix-blend-mode:soft-light}.hc-head,.hc-grid{position:relative;z-index:1}.hc-title{font-family:'Creepster','Coiny',system-ui;font-size:1.72rem;letter-spacing:.045em;color:#E9A263;line-height:1.05}.hc-progress{height:8px;border-radius:99px;background:rgba(255,255,255,.11);overflow:hidden;margin:.65rem 0}.hc-progress>span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#A95025,#E9A263);transition:width .5s ease}.hc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.72rem;margin-top:1rem}.hc-card{position:relative;min-height:218px;border-radius:1.25rem;overflow:hidden;border:1px solid rgba(255,243,221,.16);background:#30251D;box-shadow:0 12px 24px rgba(0,0,0,.18);text-align:left;color:#FFF3DD;padding:0;cursor:pointer}.hc-card-img{height:154px;overflow:hidden;background:linear-gradient(145deg,#2C332A,#4A3426)}.hc-card-img img{width:100%;height:100%;object-fit:cover;transition:filter .35s ease,transform .35s ease}.hc-card.locked .hc-card-img img{filter:blur(13px) brightness(.32) saturate(.5);transform:scale(1.12)}.hc-card.inactive{opacity:.48}.hc-card-copy{padding:.72rem}.hc-card-name{font-family:'Creepster','Coiny',system-ui;font-size:1.13rem;letter-spacing:.035em}.hc-card-state{font-size:.58rem;font-weight:900;letter-spacing:.1em;margin-top:.18rem;color:#D4C5AF}.hc-soldout{position:absolute;right:.55rem;top:.55rem;background:#87261F;color:#FFF3DD;border:1px solid rgba(255,255,255,.2);padding:.27rem .45rem;border-radius:999px;font-family:'Creepster','Coiny',system-ui;font-size:.7rem;letter-spacing:.05em}.hc-lock{position:absolute;left:.55rem;top:.55rem;width:29px;height:29px;display:grid;place-items:center;background:rgba(20,15,12,.8);border-radius:50%;font-size:.75rem}.hc-complete{position:relative;z-index:1;margin-top:1rem;padding:1rem;border:1px solid rgba(233,162,99,.5);border-radius:1.2rem;background:rgba(169,80,37,.16);text-align:center}.hc-detail-image{width:100%;max-height:360px;object-fit:cover;border-radius:1.4rem;background:#2B211A}.hc-unlock{position:fixed;inset:0;z-index:9000;background:#100D0B;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:1.2rem;color:#FFF3DD;overflow:hidden}.hc-unlock::before{content:'';position:absolute;inset:-20%;background:radial-gradient(circle,rgba(201,98,40,.38),transparent 36%),radial-gradient(rgba(255,243,221,.18) .7px,transparent .8px);background-size:auto,7px 7px;animation:hcSmoke 2.6s ease-out both}.hc-unlock-image{position:relative;width:min(72vw,330px);height:min(72vw,330px);object-fit:cover;border-radius:2rem;filter:blur(18px) brightness(.25);animation:hcReveal 2.2s .25s cubic-bezier(.2,.8,.2,1) forwards;box-shadow:0 0 0 1px rgba(233,162,99,.45),0 30px 80px rgba(0,0,0,.55)}.hc-unlock-copy{position:relative;text-align:center;margin-top:1rem;animation:hcCopy .7s 1.5s both}.hc-unlock-copy h2{font-family:'Creepster','Coiny',system-ui;font-size:2.35rem;color:#E9A263;letter-spacing:.06em}@keyframes hcReveal{0%{filter:blur(18px) brightness(.2);transform:scale(.84);opacity:.15}65%{filter:blur(2px) brightness(.9);transform:scale(1.04);opacity:1}100%{filter:none;transform:scale(1);opacity:1}}@keyframes hcSmoke{0%{opacity:0;transform:scale(.8) rotate(0)}50%{opacity:1}100%{opacity:.38;transform:scale(1.2) rotate(6deg)}}@keyframes hcCopy{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.hc-detail-overlay{position:fixed;inset:0;z-index:9200;display:flex;align-items:center;justify-content:center;padding:max(1rem,env(safe-area-inset-top)) 1rem max(1rem,env(safe-area-inset-bottom));background:rgba(16,13,11,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+.hc-detail-card{position:relative;width:100%;max-width:430px;max-height:92vh;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:1rem;background:#F3E5CB;color:#241A14;border:1px solid #A95025;border-radius:1.8rem;box-shadow:0 30px 80px rgba(0,0,0,.52);animation:popIn .36s var(--spring) both}
+.hc-detail-close{position:absolute;right:1.55rem;top:1.55rem;z-index:3;width:40px;height:40px;min-height:40px;border-radius:50%;border:1px solid rgba(255,243,221,.3);background:rgba(16,13,11,.8);color:#FFF3DD;display:grid;place-items:center;box-shadow:0 8px 20px rgba(0,0,0,.28)}
+.hc-detail-image{width:100%;height:min(58vh,390px);max-height:none;object-fit:cover;border-radius:1.4rem;background:#2B211A}
+.hc-detail-placeholder{width:100%;height:min(58vh,390px);display:grid;place-items:center;border-radius:1.4rem;background:linear-gradient(145deg,#2C332A,#4A3426);font-size:4rem}
 @media(min-width:620px){.hc-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(prefers-reduced-motion:reduce){.hc-unlock::before,.hc-unlock-image,.hc-unlock-copy{animation:none!important}.hc-unlock-image{filter:none;opacity:1}}
 </style>
 
@@ -3282,7 +3287,7 @@ window.setTamperIcon = function(url){
     </div>
     <div class="hc-grid">
       <template x-for="character in halloweenCharacters" :key="character.characterId||character.id">
-        <button class="hc-card" :class="{'locked':!halloweenUnlockFor(character),'inactive':character.active===false}" @click="openHalloweenDetail(character)" :disabled="character.active===false">
+        <button class="hc-card" :class="{'locked':!halloweenUnlockFor(character),'inactive':character.active===false}" @click="openHalloweenDetail(character)" :disabled="character.active===false && !halloweenUnlockFor(character)">
           <div class="hc-card-img">
             <img :src="character.imageUrl||''" :alt="halloweenUnlockFor(character)?character.name:'Personaje oculto'" x-show="character.imageUrl">
             <div x-show="!character.imageUrl" style="height:100%;display:grid;place-items:center;font-size:2.5rem;">🎃</div>
@@ -3556,20 +3561,22 @@ window.setTamperIcon = function(url){
 
 <!-- Detalle premium del personaje encontrado -->
 <template x-if="halloweenDetail">
-  <div class="mo" style="display:flex;z-index:8200;background:rgba(16,13,11,.76);backdrop-filter:blur(12px);" @click.self="halloweenDetail=null">
-    <div class="ms" style="background:#F3E5CB;max-width:520px;color:#241A14;border:1px solid #A95025;max-height:92vh;overflow:auto;">
-      <button class="mx" @click="halloweenDetail=null"><i class="fa-solid fa-xmark"></i></button>
-      <img class="hc-detail-image" :src="halloweenDetail.character.imageUrl||''" :alt="halloweenDetail.character.name">
+  <div class="hc-detail-overlay" @click.self="closeHalloweenDetail()" role="dialog" aria-modal="true" :aria-label="'Detalle de '+(halloweenDetail.character.name||'personaje')">
+    <div class="hc-detail-card" x-ref="halloweenDetailCard">
+      <button class="hc-detail-close" @click="closeHalloweenDetail()" aria-label="Cerrar detalle"><i class="fa-solid fa-xmark"></i></button>
+      <template x-if="halloweenDetail.character.imageUrl"><img class="hc-detail-image" :src="halloweenDetail.character.imageUrl" :alt="halloweenDetail.character.name"></template>
+      <template x-if="!halloweenDetail.character.imageUrl"><div class="hc-detail-placeholder" aria-hidden="true">🎃</div></template>
       <div style="padding:1rem .25rem .25rem;">
-        <h2 class="hc-title" style="font-size:2.4rem;color:#A95025;" x-text="halloweenDetail.character.name"></h2>
-        <p style="font-size:.84rem;font-weight:800;color:#5D4A3D;" x-text="halloweenDetail.character.subtitle"></p>
+        <h2 class="hc-title" style="font-size:2.4rem;color:#A95025;" x-text="halloweenDetail.character.name||'Personaje encontrado'"></h2>
+        <p style="font-size:.84rem;font-weight:800;color:#5D4A3D;" x-text="halloweenDetail.character.subtitle||'RATIO HALLOWEEN COLLECTION'"></p>
         <p style="font-size:.62rem;font-weight:900;letter-spacing:.1em;color:#355C45;margin-top:.55rem;">ENCONTRADO · <span x-text="halloweenFoundDate(halloweenDetail.unlock)"></span></p>
-        <p style="font-size:.82rem;line-height:1.7;color:#493A30;margin-top:1rem;" x-text="halloweenDetail.character.description"></p>
+        <p style="font-size:.82rem;line-height:1.7;color:#493A30;margin-top:1rem;" x-text="halloweenDetail.character.description||'Su historia todavía permanece en secreto.'"></p>
         <div style="margin-top:1rem;padding:1rem;border-radius:1rem;background:#DDD0B8;border:1px solid #C8B393;">
           <p class="hc-title" style="font-size:1rem;color:#A95025;">PISTA</p>
-          <p style="font-size:.76rem;line-height:1.55;color:#493A30;margin-top:.3rem;font-style:italic;" x-text="halloweenDetail.character.hint"></p>
+          <p style="font-size:.76rem;line-height:1.55;color:#493A30;margin-top:.3rem;font-style:italic;" x-text="halloweenDetail.character.hint||'Sigue buscando pistas en Ratio.'"></p>
         </div>
         <p style="font-size:.62rem;font-weight:900;color:#87261F;margin-top:.9rem;" x-show="Number(halloweenDetail.character.stockAvailable||0)<=0">AGOTADA · Tu personaje permanece en la colección.</p>
+        <button @click="closeHalloweenDetail()" style="width:100%;margin-top:1rem;padding:.85rem;border:0;border-radius:999px;background:#A95025;color:#fff;font-size:.68rem;font-weight:900;letter-spacing:.08em;">VOLVER A MI COLECCIÓN</button>
       </div>
     </div>
   </div>
@@ -4458,6 +4465,8 @@ Alpine.data('app',()=>({
     });
     window.addEventListener('appinstalled', ()=>{ this.canInstall=false; this.installPrompt=null; });
     window.addEventListener('tamper:native-back',event=>{
+      if(this.halloweenUnlockAnimation){this.finishHalloweenAnimation(false);event.detail.handled=true;return;}
+      if(this.halloweenDetail){this.closeHalloweenDetail();event.detail.handled=true;return;}
       const layers=['mQR','mCD','mPG','mRd','mNf','mMascot','showSearch','showWrapped','showDrinkQuiz','showStreakRecover','bdayModal','mItem','pgCartOpen','confirmSend','mAch','showPushPrompt'];
       const open=layers.find(key=>this[key]===true);
       if(open){this[open]=false;event.detail.handled=true;return;}
@@ -4643,9 +4652,10 @@ Alpine.data('app',()=>({
   get halloweenRequired(){return this.halloweenCharacters.filter(c=>c.active!==false&&c.requiredForCompletion!==false);},
   get halloweenFoundRequired(){const ids=new Set(this.halloweenUnlocks.filter(u=>u.campaignId===(this.halloweenCampaign?.campaignId||this.halloweenCampaign?.id)).map(u=>u.characterId));return this.halloweenRequired.filter(c=>ids.has(c.characterId||c.id)).length;},
   get halloweenProgressPercent(){return this.halloweenRequired.length?Math.min(100,(this.halloweenFoundRequired/this.halloweenRequired.length)*100):0;},
-  halloweenUnlockFor(character){const id=character?.characterId||character?.id,campaignId=this.halloweenCampaign?.campaignId||this.halloweenCampaign?.id;return this.halloweenUnlocks.find(u=>u.campaignId===campaignId&&u.characterId===id)||null;},
+  halloweenUnlockFor(character){const id=String(character?.characterId||character?.id||'').trim().toLowerCase(),campaignId=String(this.halloweenCampaign?.campaignId||this.halloweenCampaign?.id||'').trim();return this.halloweenUnlocks.find(u=>String(u.campaignId||'').trim()===campaignId&&String(u.characterId||'').trim().toLowerCase()===id)||null;},
   halloweenFoundDate(unlock){const ts=unlock?.unlockedAt?.toMillis?unlock.unlockedAt.toMillis():Number(unlock?.unlockedAt||0);return ts?new Intl.DateTimeFormat('es-MX',{day:'2-digit',month:'short'}).format(new Date(ts)).replace('.','').toUpperCase():'';},
-  openHalloweenDetail(character){const unlock=this.halloweenUnlockFor(character);if(!unlock)return;this.halloweenDetail={character,unlock};this.feel('tap','light');},
+  openHalloweenDetail(character,knownUnlock=null){const unlock=knownUnlock||this.halloweenUnlockFor(character);if(!unlock)return;this.halloweenDetail={character:{...character},unlock:{...unlock}};this.feel('tap','light');this.$nextTick(()=>{if(this.$refs.halloweenDetailCard)this.$refs.halloweenDetailCard.scrollTop=0;});},
+  closeHalloweenDetail(){this.halloweenDetail=null;this.feel('tap','light');},
   checkHalloweenUnlockAnimation(){
     if(this.halloweenUnlockAnimation||!this.halloweenCampaign||!this.halloweenCharacters.length)return;
     const campaignId=this.halloweenCampaign.campaignId||this.halloweenCampaign.id;
@@ -4666,7 +4676,7 @@ Alpine.data('app',()=>({
     const current=this.halloweenUnlockAnimation;if(!current)return;
     try{const{functions,httpsCallable}=window.__tf;await httpsCallable(functions,'markHalloweenUnlockSeen')({campaignId:current.unlock.campaignId,characterId:current.unlock.characterId});current.unlock.animationSeen=true;}catch(e){console.warn('Halloween animation seen:',e);return this.toast2('Necesitamos conexión para confirmar el desbloqueo','⚠️');}
     this.halloweenUnlockAnimation=null;
-    if(openDetail)this.openHalloweenDetail(current.character);
+    if(openDetail)this.$nextTick(()=>this.openHalloweenDetail(current.character,current.unlock));
     setTimeout(()=>this.checkHalloweenUnlockAnimation(),250);
   },
   listenCoupons(){
@@ -6526,7 +6536,7 @@ Alpine.data('app',()=>({
       const deviceId=await this.pushDeviceId(token);
       const device={
         token,tokenType:'fcm',platform:registration?.platform||'android',enabled:true,
-        appVersion:'1.0.7',build:window.__TAMPER_BUILD__||'',updatedAt:serverTimestamp(),
+        appVersion:'1.0.8',build:window.__TAMPER_BUILD__||'',updatedAt:serverTimestamp(),
         preferences:{pickgo:true,promotions:true,visitReminders:true,automatic:true},
       };
       // El documento principal ya es editable por el propio cliente en la
@@ -6534,7 +6544,7 @@ Alpine.data('app',()=>({
       // dependa de que las reglas permitan todavía la subcolección devices.
       await setDoc(doc(db,'tamper_clients',uid),{
         pushEnabled:true,pushToken:token,pushPlatform:device.platform,
-        pushAppVersion:'1.0.7',pushPreferences:device.preferences,
+        pushAppVersion:'1.0.8',pushPreferences:device.preferences,
         pushUpdatedAt:serverTimestamp(),
       },{merge:true});
       try{

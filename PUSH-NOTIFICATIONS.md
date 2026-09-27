@@ -1,6 +1,6 @@
 # Notificaciones push de Tamper Rewards
 
-Tamper Rewards 1.0.7 registra cada instalación Android con Firebase Cloud
+Tamper Rewards 1.0.8 registra cada instalación Android con Firebase Cloud
 Messaging. Después de que el usuario concede permiso, el token se guarda en:
 
 ```text

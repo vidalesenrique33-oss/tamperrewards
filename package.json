@@ -1,6 +1,6 @@
 {
   "name": "tamper-rewards-mobile",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
   "description": "Tamper Rewards para Android, iOS y PWA.",
   "scripts": {

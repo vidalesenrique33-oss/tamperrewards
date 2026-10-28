@@ -30,7 +30,7 @@ public class TamperNfcPlugin extends Plugin {
     private NfcAdapter adapter;
     private PluginCall pending;
     private Runnable timeout;
-    private long generation = 0;
+    private volatile long generation = 0;
     private boolean resumed = false;
     private static final long TIMEOUT_MS = 30000;
 
@@ -81,6 +81,7 @@ public class TamperNfcPlugin extends Plugin {
     }
 
     private void readTag(Tag tag, long request) {
+        if (request != generation) return;
         if (!processing.compareAndSet(false, true)) return;
         Ndef ndef = Ndef.get(tag);
         try {

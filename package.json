@@ -8,7 +8,8 @@
     "copy": "npx cap copy",
     "doctor": "node scripts/doctor.mjs",
     "android": "npx cap open android",
-    "ios": "npx cap open ios"
+    "ios": "npx cap open ios",
+    "test:nfc": "node --test tests/nfc-reader.test.cjs"
   },
   "dependencies": {
     "@capacitor-firebase/authentication": "^8.5.2",
@@ -29,7 +30,8 @@
     "@capacitor/status-bar": "8.0.3"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.5.2"
+    "@capacitor/cli": "8.5.2",
+    "jsdom": "^26.1.0"
   },
   "engines": {
     "node": ">=22.0.0"

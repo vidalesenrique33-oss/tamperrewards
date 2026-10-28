@@ -138,7 +138,14 @@
   });
 
   document.addEventListener('DOMContentLoaded',()=>{
+    if(window.TamperNative.platform==='android'){
+      const style=document.createElement('link');
+      style.rel='stylesheet';style.href='./nfc-reader.css';document.head.appendChild(style);
+      const reader=document.createElement('script');
+      reader.src='./nfc-reader.js';reader.defer=true;document.body.appendChild(reader);
+    }
     window.TamperNative.setTheme();
     setTimeout(()=>plugins.SplashScreen?.hide().catch(()=>{}),450);
   },{once:true});
 })();
+

@@ -10,6 +10,8 @@ public class MainActivity extends BridgeActivity {
         // Registro explícito: garantiza que Firebase Authentication forme parte
         // del Bridge aun si falla la carga automática de capacitor.plugins.json.
         registerPlugin(FirebaseAuthenticationPlugin.class);
+        registerPlugin(TamperNfcPlugin.class);
         super.onCreate(savedInstanceState);
     }
 }
+

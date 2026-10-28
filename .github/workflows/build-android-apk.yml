@@ -5,12 +5,15 @@ on:
   push:
     branches:
       - main
+      - codex/android-nfc-pilot
     paths:
       - "www/**"
       - "android/**"
       - "capacitor.config.json"
       - "package.json"
       - "package-lock.json"
+      - "tests/**"
+      - "scripts/**"
       - ".github/workflows/build-android-apk.yml"
 
 permissions:
@@ -40,7 +43,8 @@ jobs:
           cache: gradle
 
       - name: Conservar firma de prueba
-        uses: actions/cache@v4
+        id: restore-signing
+        uses: actions/cache/restore@v4
         with:
           path: ~/.android/debug.keystore
           key: tamper-rewards-debug-keystore-v1
@@ -61,14 +65,58 @@ jobs:
             echo "SHA-1: \`$SHA1\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Guardar firma de prueba antes de validar Firebase
+        if: steps.restore-signing.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: tamper-rewards-debug-keystore-v1
+
       - name: Instalar dependencias
         run: npm ci
+
+      - name: Probar el lector NFC y la alternativa QR
+        run: npm run test:nfc
 
       - name: Verificar proyecto Tamper Rewards
         run: npm run doctor
 
       - name: Sincronizar Capacitor con Android
         run: npm run sync -- android
+
+      - name: Compilar APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          TAMPER_DEBUG_KEYSTORE="$HOME/.android/debug.keystore" ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Preparar archivo descargable
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk
+
+      - name: Verificar contenido nativo empaquetado
+        shell: bash
+        run: |
+          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
+          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
+          grep -q 'FirebaseAuthenticationPlugin' /tmp/tamper-capacitor-plugins.json
+          grep -q '1.0.4-google-oauth-diagnostics' /tmp/tamper-native-bridge.js
+          grep -q 'cap.nativePromise(pluginName,methodName,options)' /tmp/tamper-native-bridge.js
+          {
+            echo ""
+            echo "## Contenido nativo"
+            echo ""
+            echo "✅ El APK contiene Firebase Authentication."
+            echo "✅ El APK contiene el puente nativo y diagnóstico OAuth Tamper Rewards 1.0.4."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verificar lector NFC empaquetado
+        shell: bash
+        run: |
+          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/public/nfc-reader.js > /tmp/tamper-nfc-reader.js
+          test -s /tmp/tamper-nfc-reader.js
+          grep -q '1.0.5-nfc-pilot' /tmp/tamper-nfc-reader.js
+          grep -q 'startScan' /tmp/tamper-nfc-reader.js
+          echo 'Lector NFC incluido; pruebas de hardware pendientes.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Revisar configuración de Firebase
         shell: bash
@@ -105,31 +153,6 @@ jobs:
             exit 1
           fi
 
-      - name: Compilar APK
-        working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Preparar archivo descargable
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.4-debug.apk
-
-      - name: Verificar contenido nativo empaquetado
-        shell: bash
-        run: |
-          unzip -p Tamper-Rewards-v1.0.4-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
-          unzip -p Tamper-Rewards-v1.0.4-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
-          grep -q 'FirebaseAuthenticationPlugin' /tmp/tamper-capacitor-plugins.json
-          grep -q '1.0.4-google-oauth-diagnostics' /tmp/tamper-native-bridge.js
-          grep -q 'cap.nativePromise(pluginName,methodName,options)' /tmp/tamper-native-bridge.js
-          {
-            echo ""
-            echo "## Contenido nativo"
-            echo ""
-            echo "✅ El APK contiene Firebase Authentication."
-            echo "✅ El APK contiene el puente nativo y diagnóstico OAuth Tamper Rewards 1.0.4."
-          } >> "$GITHUB_STEP_SUMMARY"
-
       - name: Verificar firma y cliente OAuth del APK
         shell: bash
         run: |
@@ -139,52 +162,30 @@ jobs:
             APKSIGNER="$(find "$SDK_ROOT/build-tools" \( -type f -o -type l \) -name apksigner -print 2>/dev/null | sort -V | tail -1 || true)"
           fi
 
-          APK_SHA1=""
-          if [ -n "$APKSIGNER" ]; then
-            echo "apksigner: $APKSIGNER"
-            APK_SHA1="$("$APKSIGNER" verify --print-certs Tamper-Rewards-v1.0.4-debug.apk 2>&1 | sed -n 's/^Signer #1 certificate SHA-1 digest: //p' | head -1 || true)"
-          else
-            echo "Aviso: no se encontró apksigner; se omitirá únicamente la comprobación posterior." >&2
-          fi
-
-          KEY_SHA1="$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey 2>/dev/null | sed -n 's/^[[:space:]]*SHA1: //p' | head -1 || true)"
+          test -n "$APKSIGNER" || { echo "Falta apksigner" >&2; exit 1; }
+          "$APKSIGNER" verify --verbose --print-certs Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk > /tmp/tamper-signature.txt
+          cat /tmp/tamper-signature.txt
+          APK_SHA1="$(sed -nE 's/^(Signer #[0-9]+ |V[0-9.]+ Signer: )certificate SHA-1 digest: //p' /tmp/tamper-signature.txt | head -1)"
+          KEY_SHA1="$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p' | head -1)"
           APK_SHA1_NORMALIZED=$(printf '%s' "$APK_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')
           KEY_SHA1_NORMALIZED=$(printf '%s' "$KEY_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')
-          OAUTH_RESOURCE="$(find android/app/build/generated/res -type f -name values.xml -path '*google-services*' -print -quit 2>/dev/null || true)"
-          HAS_OAUTH="false"
-          if [ -n "$OAUTH_RESOURCE" ] && grep -q 'default_web_client_id' "$OAUTH_RESOURCE"; then
-            HAS_OAUTH="true"
-          fi
-
-          echo "SHA-1 de la llave: ${KEY_SHA1:-no disponible}"
-          echo "SHA-1 del APK: ${APK_SHA1:-no disponible}"
-          echo "Recurso Google Services: ${OAUTH_RESOURCE:-no encontrado}"
-          echo "Cliente OAuth generado: $HAS_OAUTH"
-
+          test -n "$APK_SHA1_NORMALIZED"
+          test "$APK_SHA1_NORMALIZED" = "$KEY_SHA1_NORMALIZED" || { echo "La firma real no coincide con Firebase" >&2; exit 1; }
+          OAUTH_RESOURCE="$(find android/app/build/generated/res -type f -name values.xml -exec grep -l 'name="default_web_client_id"' {} + | head -1)"
+          test -n "$OAUTH_RESOURCE" || { echo "Faltan recursos Firebase generados" >&2; exit 1; }
+          grep -q 'default_web_client_id' "$OAUTH_RESOURCE"
+          grep -q 'google_app_id' "$OAUTH_RESOURCE"
           {
-            echo ""
-            echo "## Verificación del APK"
-            echo ""
-            if [ -n "$APK_SHA1_NORMALIZED" ] && [ "$APK_SHA1_NORMALIZED" = "$KEY_SHA1_NORMALIZED" ]; then
-              echo "SHA-1 real del APK: \`$APK_SHA1\`"
-              echo ""
-              echo "✅ La firma real coincide con la registrada por el flujo."
-            elif [ -z "$APK_SHA1_NORMALIZED" ]; then
-              echo "⚠️ No se pudo leer la firma del APK en la comprobación posterior. El APK sí fue compilado y se publicará para permitir la prueba."
-            else
-              echo "⚠️ La firma leída del APK (\`$APK_SHA1\`) no coincide con la llave preparada (\`$KEY_SHA1\`)."
-            fi
-            if [ "$HAS_OAUTH" = "true" ]; then
-              echo "✅ Android generó \`default_web_client_id\` desde Firebase."
-            else
-              echo "⚠️ Android no generó \`default_web_client_id\`; revisa el archivo de Firebase antes de probar Google Sign-In."
-            fi
+            echo "Firma criptográfica verificada por apksigner."
+            echo "SHA-1 real del APK: $APK_SHA1"
+            echo "La firma coincide con Firebase y existen los recursos OAuth."
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publicar APK
         uses: actions/upload-artifact@v4
         with:
-          name: Tamper-Rewards-APK-v1.0.4
-          path: Tamper-Rewards-v1.0.4-debug.apk
+          name: Tamper-Rewards-APK-v1.0.5-NFC-pilot
+          path: Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk
           if-no-files-found: error
           retention-days: 14
+

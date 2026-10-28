@@ -7,6 +7,43 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:382351819259:android:a3b077c013de4abd618b5e",
+        "android_client_info": {
+          "package_name": "com.tamper.pos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "382351819259-6d5c407oob2hsmrida7i3c7esod3jkad.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tamper.pos",
+            "certificate_hash": "a4dbe4e8be25373171666cbdf52f882276075db7"
+          }
+        },
+        {
+          "client_id": "382351819259-n1qon00219a1hofno11pil3fmubdjqcs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDr2dir0ke4t038oAunO0A3L2o8rUXPAc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "382351819259-n1qon00219a1hofno11pil3fmubdjqcs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:382351819259:android:c12b6a96efe080d9618b5e",
         "android_client_info": {
           "package_name": "com.tamper.rewards"
@@ -19,6 +56,51 @@
           "android_info": {
             "package_name": "com.tamper.rewards",
             "certificate_hash": "b2b1d05c06d42719b340a016bafa09e84ef2e8ac"
+          }
+        },
+        {
+          "client_id": "382351819259-vsr188iqp4fh8ejamr96g6gduiq8jio3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tamper.rewards",
+            "certificate_hash": "1e1c7cbbd536f5ba8fc1711d7ee782129b92ce6e"
+          }
+        },
+        {
+          "client_id": "382351819259-n1qon00219a1hofno11pil3fmubdjqcs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCDr2dir0ke4t038oAunO0A3L2o8rUXPAc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "382351819259-n1qon00219a1hofno11pil3fmubdjqcs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:382351819259:android:5adb86df42df8940618b5e",
+        "android_client_info": {
+          "package_name": "om.tamper.pos"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "382351819259-16rlnj55dpl86fnki25pie2qdqeg3qrf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "om.tamper.pos",
+            "certificate_hash": "a4dbe4e8be25373171666cbdf52f882276075db7"
           }
         },
         {

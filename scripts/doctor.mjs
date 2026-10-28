@@ -30,7 +30,7 @@ assert.match(nativeBridge,/cap\.nativePromise\(pluginName,methodName,options\)/,
 assert.match(nativeBridge,/useCredentialManager:true/,'Falta Credential Manager para Google Sign-In');
 assert.match(nativeBridge,/Google clásico:/,'Falta el diagnóstico combinado de Google Sign-In');
 assert.match(mainActivity,/registerPlugin\(FirebaseAuthenticationPlugin\.class\)/,'MainActivity debe registrar Firebase Authentication explícitamente');
-assert.match(read('android/app/build.gradle'),/versionCode\s+5/,'Android debe generar una actualización distinguible');
+assert.match(read('android/app/build.gradle'),/versionCode\s+6/,'Android debe generar una actualización distinguible');
 assert.match(read('android/variables.gradle'),/androidxCredentialsVersion\s*=\s*'1\.6\.0'/,'Versión principal de Credential Manager incorrecta');
 assert.match(read('android/variables.gradle'),/androidxCredentialsPlayServicesAuthVersion\s*=\s*'1\.6\.0'/,'Las bibliotecas de Credential Manager deben usar la misma versión');
 assert.match(androidWorkflow,/java-version:\s*["']21["']/,'El constructor Android debe usar Java 21');
@@ -101,3 +101,4 @@ assert.equal(googleCalls[0].methodName,'signInWithGoogle');
 assert.equal(googleCalls[0].options.useCredentialManager,true,'Android debe intentar primero Credential Manager');
 assert.equal(nativeCredential.idToken,'tamper-test-token');
 console.log('Tamper Rewards Mobile: estructura, identificador, puente nativo y plataformas correctos.');
+

@@ -165,7 +165,7 @@ jobs:
           test -n "$APKSIGNER" || { echo "Falta apksigner" >&2; exit 1; }
           "$APKSIGNER" verify --verbose --print-certs Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk > /tmp/tamper-signature.txt
           cat /tmp/tamper-signature.txt
-          APK_SHA1="$(sed -n 's/^Signer #1 certificate SHA-1 digest: //p' /tmp/tamper-signature.txt | head -1)"
+          APK_SHA1="$(sed -nE 's/^(Signer #[0-9]+ |V[0-9.]+ Signer: )certificate SHA-1 digest: //p' /tmp/tamper-signature.txt | head -1)"
           KEY_SHA1="$(keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android -alias androiddebugkey | sed -n 's/^[[:space:]]*SHA1: //p' | head -1)"
           APK_SHA1_NORMALIZED=$(printf '%s' "$APK_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')
           KEY_SHA1_NORMALIZED=$(printf '%s' "$KEY_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')

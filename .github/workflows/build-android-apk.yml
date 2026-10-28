@@ -171,7 +171,7 @@ jobs:
           KEY_SHA1_NORMALIZED=$(printf '%s' "$KEY_SHA1" | tr -d ':' | tr '[:lower:]' '[:upper:]')
           test -n "$APK_SHA1_NORMALIZED"
           test "$APK_SHA1_NORMALIZED" = "$KEY_SHA1_NORMALIZED" || { echo "La firma real no coincide con Firebase" >&2; exit 1; }
-          OAUTH_RESOURCE="$(find android/app/build/generated/res -type f -name values.xml -path '*google-services*' -print -quit)"
+          OAUTH_RESOURCE="$(find android/app/build/generated/res -type f -name values.xml -exec grep -l 'name="default_web_client_id"' {} + | head -1)"
           test -n "$OAUTH_RESOURCE" || { echo "Faltan recursos Firebase generados" >&2; exit 1; }
           grep -q 'default_web_client_id' "$OAUTH_RESOURCE"
           grep -q 'google_app_id' "$OAUTH_RESOURCE"

@@ -43,7 +43,8 @@ jobs:
           cache: gradle
 
       - name: Conservar firma de prueba
-        uses: actions/cache@v4
+        id: restore-signing
+        uses: actions/cache/restore@v4
         with:
           path: ~/.android/debug.keystore
           key: tamper-rewards-debug-keystore-v1
@@ -64,6 +65,13 @@ jobs:
             echo "SHA-1: \`$SHA1\`"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Guardar firma de prueba antes de validar Firebase
+        if: steps.restore-signing.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: tamper-rewards-debug-keystore-v1
+
       - name: Instalar dependencias
         run: npm ci
 
@@ -75,6 +83,40 @@ jobs:
 
       - name: Sincronizar Capacitor con Android
         run: npm run sync -- android
+
+      - name: Compilar APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Preparar archivo descargable
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk
+
+      - name: Verificar contenido nativo empaquetado
+        shell: bash
+        run: |
+          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
+          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
+          grep -q 'FirebaseAuthenticationPlugin' /tmp/tamper-capacitor-plugins.json
+          grep -q '1.0.4-google-oauth-diagnostics' /tmp/tamper-native-bridge.js
+          grep -q 'cap.nativePromise(pluginName,methodName,options)' /tmp/tamper-native-bridge.js
+          {
+            echo ""
+            echo "## Contenido nativo"
+            echo ""
+            echo "✅ El APK contiene Firebase Authentication."
+            echo "✅ El APK contiene el puente nativo y diagnóstico OAuth Tamper Rewards 1.0.4."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verificar lector NFC empaquetado
+        shell: bash
+        run: |
+          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/public/nfc-reader.js > /tmp/tamper-nfc-reader.js
+          test -s /tmp/tamper-nfc-reader.js
+          grep -q '1.0.5-nfc-pilot' /tmp/tamper-nfc-reader.js
+          grep -q 'startScan' /tmp/tamper-nfc-reader.js
+          echo 'Lector NFC incluido; pruebas de hardware pendientes.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Revisar configuración de Firebase
         shell: bash
@@ -110,40 +152,6 @@ jobs:
             echo "Falta android/app/google-services.json; no se publicará un APK sin Google Sign-In." >&2
             exit 1
           fi
-
-      - name: Compilar APK
-        working-directory: android
-        run: |
-          chmod +x gradlew
-          ./gradlew assembleDebug --no-daemon
-
-      - name: Preparar archivo descargable
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk
-
-      - name: Verificar contenido nativo empaquetado
-        shell: bash
-        run: |
-          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/capacitor.plugins.json > /tmp/tamper-capacitor-plugins.json
-          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/public/native-bridge.js > /tmp/tamper-native-bridge.js
-          grep -q 'FirebaseAuthenticationPlugin' /tmp/tamper-capacitor-plugins.json
-          grep -q '1.0.4-google-oauth-diagnostics' /tmp/tamper-native-bridge.js
-          grep -q 'cap.nativePromise(pluginName,methodName,options)' /tmp/tamper-native-bridge.js
-          {
-            echo ""
-            echo "## Contenido nativo"
-            echo ""
-            echo "✅ El APK contiene Firebase Authentication."
-            echo "✅ El APK contiene el puente nativo y diagnóstico OAuth Tamper Rewards 1.0.4."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Verificar lector NFC empaquetado
-        shell: bash
-        run: |
-          unzip -p Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk assets/public/nfc-reader.js > /tmp/tamper-nfc-reader.js
-          test -s /tmp/tamper-nfc-reader.js
-          grep -q '1.0.5-nfc-pilot' /tmp/tamper-nfc-reader.js
-          grep -q 'startScan' /tmp/tamper-nfc-reader.js
-          echo 'Lector NFC incluido; pruebas de hardware pendientes.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verificar firma y cliente OAuth del APK
         shell: bash

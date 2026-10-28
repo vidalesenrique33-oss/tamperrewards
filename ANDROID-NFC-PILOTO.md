@@ -51,3 +51,9 @@ Definir y provisionar el tamper físico; autenticar su mensaje con el servidor y
 ## Reversión
 
 Los cambios están aislados en `codex/android-nfc-pilot`. No hay migraciones de datos que revertir. Cerrar la propuesta o volver al commit base recupera el código anterior. Si se instala un APK anterior, Android puede bloquear la reducción de versión; debe prepararse un build de reversión con código de versión superior y la misma firma, sin borrar datos por defecto.
+
+## Primer intento de Actions
+
+La ejecución 40610865874 pasó las 18 pruebas y doctor, pero se detuvo al comprobar OAuth: la caché de la firma anterior ya no existía. Se corrige la persistencia guardando la firma nueva antes de la comprobación de Firebase, incluso si esa comprobación falla. La compilación se realiza antes de esa comprobación para poder detectar errores Java; el APK sólo se ofrece para descarga si la configuración OAuth coincide. La huella del primer intento se descarta: el siguiente intento proporciona la que realmente queda conservada en caché para esta rama.
+
+Revisión visual: interfaz del lector probada en Chrome con adaptador NFC simulado, a 320/390/430 px; sin desbordamiento lateral y controles de 44/48 px. Matcha, Halloween y Navidad conservan textos legibles. Se comprobó estado de lectura y acción QR. Esto no es una prueba del APK en Android ni de radio NFC.

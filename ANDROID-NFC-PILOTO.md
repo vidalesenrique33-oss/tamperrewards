@@ -57,3 +57,22 @@ Los cambios están aislados en `codex/android-nfc-pilot`. No hay migraciones de 
 La ejecución 40610865874 pasó las 18 pruebas y doctor, pero se detuvo al comprobar OAuth: la caché de la firma anterior ya no existía. Se corrige la persistencia guardando la firma nueva antes de la comprobación de Firebase, incluso si esa comprobación falla. La compilación se realiza antes de esa comprobación para poder detectar errores Java; el APK sólo se ofrece para descarga si la configuración OAuth coincide. La huella del primer intento se descarta: el siguiente intento proporciona la que realmente queda conservada en caché para esta rama.
 
 Revisión visual: interfaz del lector probada en Chrome con adaptador NFC simulado, a 320/390/430 px; sin desbordamiento lateral y controles de 44/48 px. Matcha, Halloween y Navidad conservan textos legibles. Se comprobó estado de lectura y acción QR. Esto no es una prueba del APK en Android ni de radio NFC.
+
+## Resultado verificado de la compilación final
+
+- Commit de código: `8e7ac3b1cbaaff22557ca59bae811d88fb4965f6`.
+- Actions: https://github.com/vidalesenrique33-oss/tamperrewards/actions/runs/40611435305
+- `assembleDebug`: **BUILD SUCCESSFUL**. El código Java del lector compiló y se verificaron sus recursos empaquetados.
+- Las 18 pruebas y doctor pasaron también en GitHub.
+- La ejecución se detiene después al verificar OAuth. **No se publica el APK para instalación mientras la configuración de Google no coincida.**
+- El segundo y tercer intentos usan la misma firma; el tercero confirmó restauración exitosa de la caché.
+
+Huella SHA-1 que falta registrar en la aplicación Android `com.tamper.rewards` del proyecto Firebase `tamperpos`:
+
+```text
+1E:1C:7C:BB:D5:36:F5:BA:8F:C1:71:1D:7E:E7:82:12:9B:92:CE:6E
+```
+
+Desde Firebase Console: Configuración del proyecto → General → Tus apps → aplicación Android `com.tamper.rewards` → Agregar huella digital. Añadir la huella conservando las anteriores y guardar. Después descargar el `google-services.json` actualizado para reemplazar el archivo de esta rama y volver a compilar. Este paso no cambia saldos, usuarios o reglas de Firestore.
+
+Las pruebas físicas de NFC, cámara/QR y sesión en el POCO siguen pendientes. La firma de prueba vive en caché para el piloto; debe sustituirse por una estrategia de firma duradera antes de distribuir públicamente.

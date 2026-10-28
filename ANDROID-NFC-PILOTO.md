@@ -4,7 +4,7 @@
 
 Se parte de la rama `Tamper`, commit `33c97be37f83ebd85e85e5f6b92618861dd19b74`, del repositorio `vidalesenrique33-oss/tamperrewards`.
 
-Esta rama añade un lector NFC nativo Android al proyecto existente. Conserva la interfaz Rewards y su QR `TAMPER_CLIENT_<uid>`. No crea GO, EXPLORE o ACTIVE, no cambia archivos de iOS y no modifica Firebase, POS, Contabilidad, inventario o reglas comerciales.
+Esta rama añade un lector NFC nativo Android al proyecto existente. Conserva la interfaz Rewards y su QR `TAMPER_CLIENT_<uid>`. No crea GO, EXPLORE o ACTIVE, no cambia archivos de iOS y no modifica datos, reglas o funciones de Firebase, POS, Contabilidad, inventario o reglas comerciales. Se actualiza únicamente la configuración cliente de Firebase suministrada por el usuario.
 
 **Es una prueba real del lector, sin acreditación de beneficios.** La aplicación identifica si pudo leer NDEF, pero no autentica un sello comercial, no transmite su UID/payload y no concede sellos ni recompensas. Un teléfono con NFC necesita además una etiqueta física compatible para comprobar la lectura; otro teléfono o una tarjeta bancaria no son equivalentes a esa prueba.
 
@@ -40,7 +40,7 @@ No se han realizado estas pruebas físicas ni se ha registrado una compra real. 
 
 ## Firma y Firebase
 
-El archivo `google-services.json` existente pertenece a `com.tamper.rewards` en `tamperpos`. Se conserva intacto. El workflow requiere que su cliente OAuth Android coincida con la huella de la firma utilizada.
+El archivo `google-services.json` existente pertenece a `com.tamper.rewards` en `tamperpos`. Se actualiza con `google-services (3).json` suministrado por el usuario, que incluye la huella de este piloto y conserva la anterior. El workflow requiere que su cliente OAuth Android coincida con la huella de la firma utilizada.
 
 El mecanismo de firma de prueba existente se conserva mediante caché de GitHub. Si esa caché ya no existe, se generará otra firma y el workflow se detendrá indicando la huella pendiente. En ese caso hay que registrar la huella correcta en Firebase y descargar la configuración actualizada; no se elimina el control para que parezca que Google Sign-In funciona. Para publicación se necesita una estrategia de firma duradera, no depender sólo de caché.
 
@@ -58,21 +58,29 @@ La ejecución 40610865874 pasó las 18 pruebas y doctor, pero se detuvo al compr
 
 Revisión visual: interfaz del lector probada en Chrome con adaptador NFC simulado, a 320/390/430 px; sin desbordamiento lateral y controles de 44/48 px. Matcha, Halloween y Navidad conservan textos legibles. Se comprobó estado de lectura y acción QR. Esto no es una prueba del APK en Android ni de radio NFC.
 
-## Resultado verificado de la compilación final
+## Verificación de firma reforzada
 
-- Commit de código: `8e7ac3b1cbaaff22557ca59bae811d88fb4965f6`.
-- Actions: https://github.com/vidalesenrique33-oss/tamperrewards/actions/runs/40611435305
-- `assembleDebug`: **BUILD SUCCESSFUL**. El código Java del lector compiló y se verificaron sus recursos empaquetados.
-- Las 18 pruebas y doctor pasaron también en GitHub.
-- La ejecución se detiene después al verificar OAuth. **No se publica el APK para instalación mientras la configuración de Google no coincida.**
-- El segundo y tercer intentos usan la misma firma; el tercero confirmó restauración exitosa de la caché.
+La ejecución 40612460753 compiló pero el control posterior heredado sólo advertía, sin fallar, cuando no podía verificar la firma o faltaban recursos OAuth. La inspección independiente del APK detectó un certificado distinto al preparado y ausencia del recurso OAuth. Ese APK se descartó para entrega y no se instaló.
 
-Huella SHA-1 que falta registrar en la aplicación Android `com.tamper.rewards` del proyecto Firebase `tamperpos`:
+El commit `d63dfd30fef3ccbdbcd8aec980c0253fb3329fa7` configura explícitamente la llave de piloto por `TAMPER_DEBUG_KEYSTORE`, aplica Google Services sin ocultar excepciones y exige verificación criptográfica con apksigner, igualdad de huellas y recursos OAuth generados antes de subir el artefacto. La configuración Firebase coincide con:
 
 ```text
 1E:1C:7C:BB:D5:36:F5:BA:8F:C1:71:1D:7E:E7:82:12:9B:92:CE:6E
 ```
 
-Desde Firebase Console: Configuración del proyecto → General → Tus apps → aplicación Android `com.tamper.rewards` → Agregar huella digital. Añadir la huella conservando las anteriores y guardar. Después descargar el `google-services.json` actualizado para reemplazar el archivo de esta rama y volver a compilar. Este paso no cambia saldos, usuarios o reglas de Firestore.
-
 Las pruebas físicas de NFC, cámara/QR y sesión en el POCO siguen pendientes. La firma de prueba vive en caché para el piloto; debe sustituirse por una estrategia de firma duradera antes de distribuir públicamente.
+
+## Entrega verificada
+
+- Commit compilado: `6756ab1fd1d76a1e499c2fc6ad05a56bc57a80b0`.
+- Ejecución exitosa: https://github.com/vidalesenrique33-oss/tamperrewards/actions/runs/40613329943
+- 18 pruebas automatizadas aprobadas; doctor y sincronización aprobados.
+- `:app:assembleDebug`: BUILD SUCCESSFUL.
+- `:app:processDebugGoogleServices` ejecutado, recursos OAuth y google_app_id comprobados.
+- Firma criptográfica APK v2 verificada con apksigner; certificado SHA-1 coincide con la configuración Firebase.
+- APK: `Tamper-Rewards-v1.0.5-NFC-pilot-debug.apk`, 11,017,587 bytes.
+- SHA-256 del APK: `2b90516e48d720dd2564259a8e756c564aeefad0e5d1d4ae15d10fb7336b54e6`.
+- Descarga e inspección independiente: ZIP íntegro, paquete/versiones, permiso NFC opcional, clase del plugin y recursos JS/CSS presentes, QR original conservado y certificado esperado.
+- La herramienta SDK actual usa la etiqueta `V2 Signer:`; el control acepta ese formato y el anterior, sin omitir la verificación ni permitir certificados diferentes.
+- No hay publicación en Netlify/Play, fusión a la rama estable ni cambios de saldos. El artefacto de Actions es únicamente una descarga del piloto.
+- Pendientes: instalación y sesión Google reales, NFC físico con etiqueta NDEF, QR/cámara y regresión en POCO. No se han ejecutado pruebas físicas de iPhone; esta entrega sólo añade Android.
